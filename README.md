@@ -2,8 +2,8 @@
 ## This repo is created to Add resources by scraping from below open data platforms
 
 1. IRS Links for Data Extraction: 
-    https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf
-    https://www.irs.gov/pub/irs-soi/eo_info.pdf
+   - https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf
+   - https://www.irs.gov/pub/irs-soi/eo_info.pdf
     
     *NTEE Codes of Interest:
     154 Health clinic
@@ -62,12 +62,12 @@
     P99 Human Services - Multipurpose and Other N.E.C.
     
 2. CareerOneStop Link for Employment Assistance Resources:
-    https://www.careeronestop.org/Developers/Data/comprehensive-and-affiliate-american-job-centers.aspx
+   - https://www.careeronestop.org/Developers/Data/comprehensive-and-affiliate-american-job-centers.aspx
    
 3. HUD Links:
-    https://hudgis-hud.opendata.arcgis.com/
+   - https://hudgis-hud.opendata.arcgis.com/
    
 4. OpenStreetMap Download Links:
-    https://planet.openstreetmap.org/
-    https://wiki.openstreetmap.org/wiki/Tag:amenity=social%20facility?uselang=en
+   - https://planet.openstreetmap.org/
+   - https://wiki.openstreetmap.org/wiki/Tag:amenity=social%20facility?uselang=en
     
