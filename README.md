@@ -1,5 +1,8 @@
-# AddResources
-## This repo is created to Add resources by scraping from below open data platforms
+# ShelterApp
+``````
+Shelter App Inc., is an all volunteer non-profit organization whose mission is to connect homeless and low-income families to services.
+``````
+## Getting Started: This repo is created to Add resources by web crawling on below open data platforms
 
 1. IRS Links for Data Extraction: 
    - https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf
@@ -70,4 +73,8 @@
 4. OpenStreetMap Download Links:
    - https://planet.openstreetmap.org/
    - https://wiki.openstreetmap.org/wiki/Tag:amenity=social%20facility?uselang=en
-    
+   
+5. Washington State Resources form Northwest Hospitality:
+     - https://www.nwhospitality.org/welcome-homeless-neighbor
+     - https://airtable.com/shrkjUwUgqBU8vI1j/tblsz2z5rrnl9fdvG
+     
