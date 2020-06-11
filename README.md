@@ -1,5 +1,5 @@
 # AddResources
-##This repo is created to Add resources by scraping from below open data platforms
+## This repo is created to Add resources by scraping from below open data platforms
 
 1. IRS Links for Data Extraction: 
     https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf
