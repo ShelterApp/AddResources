@@ -95,5 +95,10 @@ Shelter App Inc., is an all volunteer non-profit organization whose mission is t
      - https://data.baltimorecity.gov/Health/Homeless-Shelters/hyq3-8sxr
      
 10. Public Libraries in US
-   - https://www.imls.gov/research-evaluation/data-collection/public-libraries-survey
-  
+     - https://www.imls.gov/research-evaluation/data-collection/public-libraries-survey
+
+11. Missouri Food Banks:
+     - https://catalog.data.gov/dataset/food-pantry-list
+     
+12. California Food Resources:
+     - https://dev.socrata.com/foundry/controllerdata.lacity.org/v2mg-qsxf
