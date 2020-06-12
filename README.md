@@ -4,7 +4,7 @@ Shelter App Inc., is an all volunteer non-profit organization whose mission is t
 ``````
 ## Getting Started: 
 #### This repo is created to Add resources by web crawling on below open data platforms
-   - (https://drive.google.com/drive/folders/1V652EVRsCLHznKfHXIHylIREYbmsc3MB?usp=sharing)
+(https://drive.google.com/drive/folders/1V652EVRsCLHznKfHXIHylIREYbmsc3MB?usp=sharing)
 
 1. IRS Links for Data Extraction: 
    - https://www.irs.gov/charities-non-profits/exempt-organizations-business-master-file-extract-eo-bmf
