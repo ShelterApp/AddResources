@@ -103,3 +103,9 @@ Shelter App Inc., is an all volunteer non-profit organization whose mission is t
      
 12. California Food Resources:
      - https://controllerdata.lacity.org/resource/v2mg-qsxf.json
+     
+13. Canada Homeless Shelters:
+     - https://open.canada.ca/data/en/dataset/7e0189e3-8595-4e62-a4e9-4fed6f265e10
+    
+14. BC Food Bank DataSet:
+     - https://catalogue.data.gov.bc.ca/dataset/food-banks
