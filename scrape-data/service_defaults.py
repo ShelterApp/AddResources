@@ -1,0 +1,21 @@
+service_default_values= {
+  "name": '',
+  "description": '',
+  "address1": '',
+  "address2": '',
+  "city": '',
+  "state": '',
+  "zip": '',
+  "phone": '',
+  "contactEmail": '',
+  "schedules": [],
+  "closeSchedules": [],
+  "website": '',
+  "facebook": '',
+  "twitter": '',
+  "instagram": '',
+  "youtube": '',
+  "serviceSummary": '',
+  "age": '',
+  "isContact": False
+}

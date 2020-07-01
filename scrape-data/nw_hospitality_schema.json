@@ -1,0 +1,13 @@
+{
+    "name": {"Keys": ["Resource", "Office"], "Delimiter": " "}
+    ,
+    "serviceSummary": {"Keys": ["Category", "Services"], "Delimiter": ", "},
+    "address1": "Street",
+    "city": "City",
+    "state": "State",
+    "zip": "Zip",
+    "phone": {"Keys": ["Phone", "extention"], "Delimiter": ", Ext. "},
+    "contactEmail": "Email",
+    "website": "Website",
+    "description": "Description"
+}

@@ -1,0 +1,7 @@
+{
+	"userId": "<db-username>",
+	"password": "<password>",
+	"originDb": "nwHospitality",
+	"serviceDb": "nwHospitality-to-service",
+	"schemaFile": "nw_hospitality_schema.json"
+}
