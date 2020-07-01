@@ -1,6 +1,5 @@
 {
-    "name": {"Keys": ["Resource", "Office"], "Delimiter": " "}
-    ,
+    "name": {"Keys": ["Resource", "Office"], "Delimiter": " "},
     "serviceSummary": {"Keys": ["Category", "Services"], "Delimiter": ", "},
     "address1": "Street",
     "city": "City",
