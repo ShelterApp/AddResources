@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 from pymongo import MongoClient
 
@@ -10,10 +11,15 @@ def insert_mongoDb(data_to_insert):
 
 def remove_duplicates(filtered_data):
   client = MongoClient(
-      "mongodb+srv://democracylab:DemocracyLab2019@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")
+      "mongodb+srv://"+config['userId']+":"+config['password']+"@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")
 
-  db =
+  db = client['shelter']
+  destinationDb = db['']
   return filtered_data
+
+# set the DB user name and password in config
+with open('./configIRS.json', 'r') as con:
+  config = json.load(con)
 
 if __name__ == "__main__":
   print("Reading the input csv file.")
