@@ -35,7 +35,7 @@ def query_db(data, ntee_cd):
   data (DataFrame): Pandas data frame.
   ntee_cd (str): NTEE code.
   """
-  client = MongoClient("mongodb+srv://democracylab:DemocracyLab2019@shelter-rm3lc.azure.mongodb.net/test?authSource=admin&replicaSet=Shelter-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")
+  client = MongoClient("mongodb+srv://{Username}:{Password}@shelter-rm3lc.azure.mongodb.net/test?authSource=admin&replicaSet=Shelter-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")
   db = client["shelter"]
   services = db["services"]
   tmp = db["tmp"]
