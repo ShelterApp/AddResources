@@ -3,6 +3,16 @@
 Shelter App Inc., is an all volunteer non-profit organization whose mission is to help homeless and low-income families connect to services using web and mobile app.
 ``````
 ## Getting Started: 
+
+#### Shelter app currently supports following types and sub-types of the services hence all the scrapped data should fall under one or more of these.
+Type | Service Sub Type
+-- | --
+FOOD	| Food Pantry, Soup Kitchen
+SHELTER	| Transitional Shelter, Transitional Housing, Emergency Shelter
+HEALTH	| Medical Clinic, Mental Health Services
+RESOURCES	| Miscellaneous Services, Support Services, Legal Assistance, Senior Resources
+WORK	| 
+
 #### This repo is created to Add resources by web crawling on below open data platforms
 (https://drive.google.com/drive/folders/1V652EVRsCLHznKfHXIHylIREYbmsc3MB?usp=sharing)
 
