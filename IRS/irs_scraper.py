@@ -19,15 +19,16 @@ db = client['shelter']
 db_coll = db['services']
 
 
-def insert_services(data, client):
+def insert_services(data, client, collection):
     """Intake scraped services that have been processed and dupe-checked, and add to MongoDB.
 
     Args:
         data (dict): dictionary of IRS services containing ID, name, location and NTEE code
         client (obj): MongoClient object
+        collection (str): the Mongo collection in which the data should be inserted
     """    
     db = client['shelter']
-    db_coll = db['tmpIRS']
+    db_coll = db[collection]
     db_coll.insert_many(data)
 
 
@@ -66,6 +67,7 @@ def grab_data(config, code_dict):
             except KeyError:
                     code_descriptions.append('summary not found.')
     df['service_summary'] = code_descriptions
+    df['source'] ['IRS']*len(df)
     return df
 
 ntee_codes = pd.read_csv('ntee_codes.csv')
@@ -76,4 +78,4 @@ code_dict = {
 if __name__ == "__main__":
     df = grab_data(config, code_dict)
     #todo: check df for duplicates
-    insert_services(df.to_dict('records'), client)
+    # insert_services(df.to_dict('records'), client, 'tmpIRS')  FOR ONCE DUPE-CHECKING IS COMPLETED
