@@ -130,3 +130,6 @@ dmypy.json
 
 # Local CSV
 Mid-Atlantic and Great Lakes Areas.csv
+
+#VSCode stuff
+.vscode/

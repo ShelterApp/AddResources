@@ -1,5 +1,20 @@
 {
 	"userId": "<db-username>",
 	"password": "<password>",
-	"destinationDb": "tmpIrsN32"
+	"destinationDb": "tmpIrsN32",
+	"dataURLs": {
+		"International non-PR": "https://www.irs.gov/pub/irs-soi/eo_xx.csv",
+		"Puerto Rico": "https://www.irs.gov/pub/irs-soi/eo_pr.csv",
+		"Northeast": "https://www.irs.gov/pub/irs-soi/eo1.csv",
+		"Mid-Atlantic": "https://www.irs.gov/pub/irs-soi/eo2.csv",
+		"Gulf Coast": "https://www.irs.gov/pub/irs-soi/eo3.csv",
+		"Everywhere Else": "https://www.irs.gov/pub/irs-soi/eo4.csv"
+	},
+	"NTEE_codes": [
+		"E21", "E30", "E32", "E50", "E60", "F32",
+		"F40", "F42", "F60", "F99", "I80", "K30", 
+		"K31", "K34", "K36", "L30", "L40", "L41",
+		"L80", "L99", "P24", "P26", "P43", "P52",
+		"P60", "P72", "P81", "P82", "P85", "P86", "P87"
+	]
 }

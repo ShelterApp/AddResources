@@ -24,7 +24,7 @@ def remove_duplicates(filtered_data):
 
   # query mongodb if services collection already contains named service by zipcode
   col_names = ['name', 'address1', 'city', 'state', 'zip', 'service_summary']
-  result = pd.DataFrame(columns=col_names);
+  result = pd.DataFrame(columns=col_names)
 
   row_counter = 0
   for index, row in filtered_data.iterrows():
