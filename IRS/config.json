@@ -3,18 +3,42 @@
 	"password": "<password>",
 	"destinationDb": "tmpIrsN32",
 	"dataURLs": {
-		"International non-PR": "https://www.irs.gov/pub/irs-soi/eo_xx.csv",
 		"Puerto Rico": "https://www.irs.gov/pub/irs-soi/eo_pr.csv",
 		"Northeast": "https://www.irs.gov/pub/irs-soi/eo1.csv",
 		"Mid-Atlantic": "https://www.irs.gov/pub/irs-soi/eo2.csv",
-		"Gulf Coast": "https://www.irs.gov/pub/irs-soi/eo3.csv",
-		"Everywhere Else": "https://www.irs.gov/pub/irs-soi/eo4.csv"
+		"Gulf Coast": "https://www.irs.gov/pub/irs-soi/eo3.csv"
 	},
-	"NTEE_codes": [
-		"E21", "E30", "E32", "E50", "E60", "F32",
-		"F40", "F42", "F60", "F99", "I80", "K30", 
-		"K31", "K34", "K36", "L30", "L40", "L41",
-		"L80", "L99", "P24", "P26", "P43", "P52",
-		"P60", "P72", "P81", "P82", "P85", "P86", "P87"
-	]
+	"NTEE_codes": {
+		"E21": {"type": "HEALTH", "sub-type": "Medical Clinic", "service_summary": "Community Health Systems"},
+		"E30": {"type": "HEALTH", "sub-type": "Medical Clinic", "service_summary": "Ambulatory & Primary Health Care"},
+		"E32": {"type": "HEALTH", "sub-type": "Medical Clinic", "service_summary": "Community Clinics"},
+		"E50": {"type": "HEALTH", "sub-type": "Medical Clinic", "service_summary": "Rehabilitative Care"},
+		"E60": {"type": "HEALTH", "sub-type": "Medical Clinic", "service_summary": "Health Support"},
+		"F32": {"type": "HEALTH", "sub-type": "Mental Health Services", "service_summary": "Community Mental Health Centers"},
+		"F40": {"type": "HEALTH", "sub-type": "Mental Health Services", "service_summary": "Hot Lines & Crisis Intervention"},
+		"F42": {"type": "HEALTH", "sub-type": "Medical Clinic", "service_summary": "Sexual Assault Services"},
+		"F60": {"type": "HEALTH", "sub-type": "Mental Health Services", "service_summary": "Counseling"},
+		"F99": {"type": "HEALTH", "sub-type": "Mental Health Services", "service_summary": "Mental Health & Crisis Intervention N.E.C."},
+		"I80": {"type": "RESOURCES", "sub-type": "Legal Assistance", "service_summary": "Legal Services"},
+		"K30": {"type": "FOOD", "sub-type": "Food Pantry", "service_summary": "Food Programs"},
+		"K31": {"type": "FOOD", "sub-type": "Food Pantry", "service_summary": "Food Banks & Pantries"},
+		"K34": {"type": "FOOD", "sub-type": "Food Pantry", "service_summary": "Congregate Meals"},
+		"K36": {"type": "FOOD", "sub-type": "Food Pantry", "service_summary": "Meals on Wheels"},
+		"L30": {"type": "RESOURCES", "sub-type": "Miscellaneous Services", "service_summary": "Housing Search Assistance"},
+		"L40": {"type": "SHELTER", "sub-type": "Transitional Housing", "service_summary": "Temporary Housing"},
+		"L41": {"type": "SHELTER", "sub-type": "Emergency Shelter", "service_summary": "Homeless Shelters"},
+		"L80": {"type": "SHELTER", "sub-type": "", "service_summary": "Housing Support"},
+		"L99": {"type": "SHELTER", "sub-type": "Transitional Shelter", "service_summary": "Housing & Shelter N.E.C."},
+		"P24": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Salvation Army"},
+		"P26": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Volunteers of America"},
+		"P43": {"type": "SHELTER", "sub-type": "Emergency Shelter", "service_summary": "Family Violence Shelters"},
+		"P52": {"type": "RESOURCES", "sub-type": "Miscellaneous Services", "service_summary": "Transportation Assistance"},
+		"P60": {"type": "RESOURCES", "sub-type": "Miscellaneous Services", "service_summary": "Emergency Assistance"},
+		"P81": {"type": "RESOURCES", "sub-type": "Senior Resources", "service_summary": "Senior Centers"},
+		"P82": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Developmentally Disabled Centers"},
+		"P85": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Homeless Centers"},
+		"P86": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Blind & Visually Impaired Centers"},
+		"P87": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Deaf & Hearing Impaired Centers"}
+	},
+	"military_mail_locs": ["AA", "AE", "AP"]
 }
