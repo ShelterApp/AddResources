@@ -7,8 +7,10 @@ with open('config.json', 'r') as con:
   config = json.load(con)
 
 def insert_mongoDb(data_to_insert):
-  client = MongoClient(
-      "mongodb+srv://democracylab:DemocracyLab2019@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")
+ client = MongoClient(
+    "mongodb+srv://" + config['userId'] + ":" + config['password'] 
+    + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
+)
   db = client['shelter']
   db_coll = db['tmpIrsN32']
 
