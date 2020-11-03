@@ -242,13 +242,16 @@ def purge_EIN_duplicates(df, client, collection):
 
 
 def main(config, client, check_collection, dump_collection, dupe_collection):
-    stored_update_date = client['data-sources'].find_one(
-        {"name": "irs_exempt_organizations"}
-    )['last_updated']
     scraped_update_date = scrape_updated_date()
-    if check_site_for_new_date(stored_update_date):
-        print('No new update detected. Exiting script...')
-        return
+    try:
+        stored_update_date = client['data-sources'].find_one(
+            {"name": "irs_exempt_organizations"}
+        )['last_updated']
+        if check_site_for_new_date(stored_update_date):
+            print('No new update detected. Exiting script...')
+            return
+    except KeyError:
+        pass
     client['data_sources'].update_one(
         {"name": "irs_exempt_organizations"},
         {'$set': {'last_updated': scraped_update_date}}
