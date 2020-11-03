@@ -6,6 +6,8 @@ import os
 from tqdm import tqdm
 import re
 from collections import OrderedDict
+import requests
+from datetime import datetime, date
 
 # set the DB user name and password in config
 with open('IRS/config.json', 'r') as con:
@@ -111,6 +113,37 @@ def insert_services(data, client, collection):
     db_coll.insert_many(data)
 
 
+def scrape_updated_date():
+    url = 'https://www.irs.gov/charities-non-profits/exempt-' \
+          'organizations-business-master-file-extract-eo-bmf'
+    resp = requests.get(url).text
+    update_statement = re.search(
+        r'Updated data posting date: (\d\d?/\d\d?/\d{4}) Record', resp
+    )
+    scraped_date = datetime.strptime(
+        update_statement.group(1), "%m/%d/%Y"
+    )
+    return scraped_date
+
+
+def check_site_for_new_date(existing_date):
+    """Check IRS web page with data files to see if the most
+    recently updated date is different than the date in MongoDB
+
+    Args:
+        existing_date (datetime): the date that the IRS last updated,
+        according to the data-sources collection
+
+    Returns:
+        bool: whether or not the dates are different
+    """
+    scraped_date = scrape_updated_date()
+    if scraped_date > existing_date:
+        return True
+    else:
+        return False
+
+
 # TODO: convert from print statements to the creation of a log
 def grab_data(config, code_dict):
     """Access hosted IRS csv files, append them together,
@@ -192,23 +225,54 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     return False
 
 
-def main(config, client, collection):
+def prevent_IRS_EIN_duplicates(EIN, client, collection):
+    coll = client[collection]
+    dupe = coll.find_one(
+        {'EIN': EIN}
+    )
+    return dupe
+
+
+def purge_EIN_duplicates(df, client, collection):
+    for i in range(len(df)):
+        EIN = df.loc[i, 'EIN']
+        if prevent_IRS_EIN_duplicates(EIN, client, collection):
+            df.drop(i)
+    return df.reset_index(drop=True)
+
+
+def main(config, client, check_collection, dump_collection, dupe_collection):
+    stored_update_date = client['data-sources'].find_one(
+        {"name": "irs_exempt_organizations"}
+    )['last_updated']
+    scraped_update_date = scrape_updated_date()
+    if check_site_for_new_date(stored_update_date):
+        print('No new update detected. Exiting script...')
+        return
+    client['data_sources'].update_one(
+        {"name": "irs_exempt_organizations"},
+        {'$set': {'last_updated': scraped_update_date}}
+    )
     code_dict = config['NTEE_codes']
     df = grab_data(config, code_dict)
-    if client[collection].count() == 0:  # Check if the desired collection is empty
+    df = purge_EIN_duplicates(df, client, dump_collection)
+    if client[check_collection].count() == 0:  # Check if the desired collection is empty
         # No need to check for duplicates in an empty collection
-        insert_services(df.to_dict('records'), client, collection)
+        insert_services(df.to_dict('records'), client, dump_collection)
     else:
-        refresh_ngrams(client, collection)
+        refresh_ngrams(client, check_collection)
+        found_duplicates = []
         for i in range(len(df)):
             dc = locate_potential_duplicate(
-                df.loc[i, 'NAME'], df.loc[i, 'ZIP'], client, collection
+                df.loc[i, 'NAME'], df.loc[i, 'ZIP'], client, check_collection
             )
             if check_similarity(df.loc[i, 'NAME'], dc):
-                df.drop(i)
-        df = df.reset_index(drop=True)
-        insert_services(df.to_dict('records'), client, collection)
+                found_duplicates.append(i)
+        duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
+        insert_services(duplicate_df.to_dict('records'), client, dupe_collection)
+        df = df.drop(found_duplicates).reset_index(drop=True)
+        insert_services(df.to_dict('records'), client, dump_collection)
 
 
 if __name__ == "__main__":
-    main(config, client, 'tmpIRS')
+    main(config, client, 'services', 'tmpIRS', 'tmpIRSFoundDuplicates')
