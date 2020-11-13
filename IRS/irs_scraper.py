@@ -166,6 +166,7 @@ def grab_data(config, code_dict):
         ]).fillna('0')
         print(f'initial shape: {response.shape}')
         response = response[
+            # TODO: change to startswith
             response['NTEE_CD'].str.contains(codes)
         ]  # filter for desired NTEE codes
         response = response[
@@ -233,12 +234,17 @@ def prevent_IRS_EIN_duplicates(EIN, client, collection):
     return dupe
 
 
-def purge_EIN_duplicates(df, client, collection):
+def purge_EIN_duplicates(df, client, collection, dupe_collection):
+    found_duplicates = []
     for i in range(len(df)):
-        EIN = df.loc[i, 'EIN']
+        EIN = int(df.loc[i, 'EIN'])
         if prevent_IRS_EIN_duplicates(EIN, client, collection):
-            df.drop(i)
-    return df.reset_index(drop=True)
+            found_duplicates.append(i)
+    duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
+    print('inserting tmpIRS dupes into the dupe collection')
+    insert_services(duplicate_df.to_dict('records'), client, dupe_collection)
+    df = df.drop(found_duplicates).reset_index(drop=True)
+    return df
 
 
 def main(config, client, check_collection, dump_collection, dupe_collection):
@@ -258,13 +264,16 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
     )
     code_dict = config['NTEE_codes']
     df = grab_data(config, code_dict)
+    print('purging EIN duplicates')
     df = purge_EIN_duplicates(df, client, dump_collection)
     if client[check_collection].count() == 0:  # Check if the desired collection is empty
         # No need to check for duplicates in an empty collection
         insert_services(df.to_dict('records'), client, dump_collection)
     else:
+        print('refreshing ngrams')
         refresh_ngrams(client, check_collection)
         found_duplicates = []
+        print('checking for duplicates in the services collection')
         for i in range(len(df)):
             dc = locate_potential_duplicate(
                 df.loc[i, 'NAME'], df.loc[i, 'ZIP'], client, check_collection
@@ -272,6 +281,7 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
             if check_similarity(df.loc[i, 'NAME'], dc):
                 found_duplicates.append(i)
         duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
+        print('inserting services dupes into the dupe collection')
         insert_services(duplicate_df.to_dict('records'), client, dupe_collection)
         df = df.drop(found_duplicates).reset_index(drop=True)
         insert_services(df.to_dict('records'), client, dump_collection)
