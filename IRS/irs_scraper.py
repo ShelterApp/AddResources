@@ -15,7 +15,7 @@ with open('IRS/config.json', 'r') as con:
 
 # Establish global variables
 client = MongoClient(
-    "mongodb+srv://" + config['userId'] + ":" + config['password']
+    "mongodb+srv://" + os.environ.get('DBUSERNAME') + ":" + os.environ.get('PW')
     + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
 )['shelter']
 
@@ -49,7 +49,7 @@ def refresh_ngrams(client, collection):
         collection (str): name of the collection in the db
     """
     coll = client[collection]
-    for document in coll.find():
+    for document in tqdm(coll.find()):
         try:
             coll.update_one(
                 {"_id": document["_id"]},
@@ -258,6 +258,7 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
             return
     except KeyError:
         pass
+    print('updating scraped update date in data-sources collection')
     client['data_sources'].update_one(
         {"name": "irs_exempt_organizations"},
         {'$set': {'last_updated': scraped_update_date}}
@@ -265,8 +266,9 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
     code_dict = config['NTEE_codes']
     df = grab_data(config, code_dict)
     print('purging EIN duplicates')
-    df = purge_EIN_duplicates(df, client, dump_collection)
-    if client[check_collection].count() == 0:  # Check if the desired collection is empty
+    if client[dump_collection].estimated_document_count() > 0:
+        df = purge_EIN_duplicates(df, client, dump_collection, dupe_collection)
+    if client[check_collection].estimated_document_count() == 0:
         # No need to check for duplicates in an empty collection
         insert_services(df.to_dict('records'), client, dump_collection)
     else:
@@ -274,17 +276,23 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
         refresh_ngrams(client, check_collection)
         found_duplicates = []
         print('checking for duplicates in the services collection')
-        for i in range(len(df)):
+        for i in tqdm(range(len(df.loc[:500]))):
             dc = locate_potential_duplicate(
                 df.loc[i, 'NAME'], df.loc[i, 'ZIP'], client, check_collection
             )
-            if check_similarity(df.loc[i, 'NAME'], dc):
-                found_duplicates.append(i)
+            if i == 0:
+                print(f'sample dupe candidate: {dc}')
+            if dc:
+                if check_similarity(df.loc[i, 'NAME'], dc):
+                    found_duplicates.append(i)
         duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
-        print('inserting services dupes into the dupe collection')
-        insert_services(duplicate_df.to_dict('records'), client, dupe_collection)
+        print(f'inserting {duplicate_df.shape[0]} services dupes into the dupe collection')
+        if len(duplicate_df) > 0:
+            insert_services(duplicate_df.to_dict('records'), client, dupe_collection)
         df = df.drop(found_duplicates).reset_index(drop=True)
-        insert_services(df.to_dict('records'), client, dump_collection)
+        print(f'final df shape: {df.shape}')
+        if len(df) > 0:
+            insert_services(df.to_dict('records'), client, dump_collection)
 
 
 if __name__ == "__main__":
