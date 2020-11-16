@@ -3,7 +3,6 @@
 	"password": "<password>",
 	"destinationDb": "tmpIrsN32",
 	"dataURLs": {
-		"Puerto Rico": "https://www.irs.gov/pub/irs-soi/eo_pr.csv",
 		"Northeast": "https://www.irs.gov/pub/irs-soi/eo1.csv",
 		"Mid-Atlantic": "https://www.irs.gov/pub/irs-soi/eo2.csv",
 		"Gulf Coast": "https://www.irs.gov/pub/irs-soi/eo3.csv"

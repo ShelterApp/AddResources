@@ -54,7 +54,7 @@ def refresh_ngrams(client, collection):
             coll.update_one(
                 {"_id": document["_id"]},
                 {"$set": {
-                    "ngrams": ' '.join(make_ngrams(document["name"]))
+                    "ngrams": ' '.join(make_ngrams(document["name"].upper()))
                 }
                 }
             )
@@ -62,7 +62,7 @@ def refresh_ngrams(client, collection):
             coll.update_one(
                 {"_id": document["_id"]},
                 {"$set": {
-                    "ngrams": ' '.join(make_ngrams(document["NAME"]))
+                    "ngrams": ' '.join(make_ngrams(document["NAME"].upper()))
                 }
                 }
             )
@@ -95,8 +95,8 @@ def distance(a, b):
 
 def check_similarity(new_service, existing_service):
     regex = r'(st\.? |saint | inc\.?| nfp)'
-    new_subbed_service = re.sub(regex, '', new_service)
-    existing_subbed_service = re.sub(regex, '', existing_service)
+    new_subbed_service = re.sub(regex, '', new_service).lower()
+    existing_subbed_service = re.sub(regex, '', existing_service).lower()
     return distance(new_subbed_service, existing_subbed_service) >= 0.9
 
 
@@ -122,7 +122,7 @@ def scrape_updated_date():
     )
     scraped_date = datetime.strptime(
         update_statement.group(1), "%m/%d/%Y"
-    )
+    ).date()
     return scraped_date
 
 
@@ -138,10 +138,7 @@ def check_site_for_new_date(existing_date):
         bool: whether or not the dates are different
     """
     scraped_date = scrape_updated_date()
-    if scraped_date > existing_date:
-        return True
-    else:
-        return False
+    return scraped_date > existing_date
 
 
 # TODO: convert from print statements to the creation of a log
@@ -163,19 +160,25 @@ def grab_data(config, code_dict):
         print(f'grabbing {u}')
         response = pd.read_csv(u, usecols=[
             'EIN', 'NAME', 'STREET', 'CITY', 'STATE', 'ZIP', 'NTEE_CD'
-        ]).fillna('0')
+        ]).rename(columns={
+            'NAME': 'name', 'STREET': 'address1',
+            'CITY': 'city', 'STATE': 'state', 'ZIP': 'zip'
+        }).fillna('0')
         print(f'initial shape: {response.shape}')
         response = response[
             # TODO: change to startswith
-            response['NTEE_CD'].str.contains(codes)
+            response['NTEE_CD'].str.startswith(codes)
         ]  # filter for desired NTEE codes
         response = response[
-            ~response['STATE'].isin(config['military_mail_locs'])
+            ~response['state'].isin(config['military_mail_locs'])
         ]  # filter out military mail locs
-        print(list(set(list(response['STATE']))))
-        response['ZIP'] = response['ZIP'].str.slice(start=0, stop=5)  # truncate ZIP codes
+        print(list(set(list(response['state']))))
+        response['zip'] = response['zip'].str.slice(start=0, stop=5)  # truncate ZIP codes
         print(f'final shape: {response.shape}')
         df = df.append(response, ignore_index=True)
+    df = df.drop_duplicates(
+        subset=['name', 'address1', 'city', 'state', 'zip'], ignore_index=True
+    )
     code_descriptions = []
     code_types = []
     code_subtypes = []
@@ -219,10 +222,10 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     grammed_name = make_ngrams(name)
     coll = client[collection]
     dupe_candidate = coll.find_one(
-        {"$text": {"$search": ' '.join(grammed_name)}, 'ZIP': zipcode}
+        {"$text": {"$search": ' '.join(grammed_name)}, 'zip': zipcode}
     )
     if dupe_candidate:
-        return dupe_candidate["NAME"]
+        return dupe_candidate["name"]
     return False
 
 
@@ -253,6 +256,9 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
         stored_update_date = client['data-sources'].find_one(
             {"name": "irs_exempt_organizations"}
         )['last_updated']
+        stored_update_date = datetime.strptime(
+            str(stored_update_date), '%Y-%m-%d %H:%M:%S'
+        ).date()
         if check_site_for_new_date(stored_update_date):
             print('No new update detected. Exiting script...')
             return
@@ -261,7 +267,7 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
     print('updating scraped update date in data-sources collection')
     client['data_sources'].update_one(
         {"name": "irs_exempt_organizations"},
-        {'$set': {'last_updated': scraped_update_date}}
+        {'$set': {'last_updated': str(scraped_update_date)}}
     )
     code_dict = config['NTEE_codes']
     df = grab_data(config, code_dict)
@@ -276,14 +282,12 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
         refresh_ngrams(client, check_collection)
         found_duplicates = []
         print('checking for duplicates in the services collection')
-        for i in tqdm(range(len(df.loc[:500]))):
+        for i in tqdm(range(len(df))):
             dc = locate_potential_duplicate(
-                df.loc[i, 'NAME'], df.loc[i, 'ZIP'], client, check_collection
+                df.loc[i, 'name'], df.loc[i, 'zip'], client, check_collection
             )
-            if i == 0:
-                print(f'sample dupe candidate: {dc}')
-            if dc:
-                if check_similarity(df.loc[i, 'NAME'], dc):
+            if dc is not False:
+                if check_similarity(df.loc[i, 'name'], dc):
                     found_duplicates.append(i)
         duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
         print(f'inserting {duplicate_df.shape[0]} services dupes into the dupe collection')

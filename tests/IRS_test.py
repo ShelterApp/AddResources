@@ -70,7 +70,7 @@ def example_IRS_search_object_with_spelled_out_saint():
                   'ISLAND PAR AINT FERIOLE ISLAND PARK SAINT FERIOLE ISLAND PARK',
         'service_summary': 'Ambulatory Health Center, Community Clinic',
         'STATE': 'WI',
-        'ZIP': '53821'
+        'zip': '53821'
     }
 
 
@@ -109,7 +109,7 @@ def example_IRS_service_data():
             'ISLAND PARK',
             'service_summary': 'Ambulatory Health Center, Community Clinic',
             'STATE': 'WI',
-            'ZIP': '53821'
+            'zip': '53821'
         },
         {
             '_id': ObjectId('5f7a5ab32410168bf92a4cbc'),
@@ -223,7 +223,7 @@ def example_IRS_service_data():
                       'RAIRIE FARM RIDGELAND FOOD PANTRY PRAIRIE FARM RIDGELAND FOOD PANTRY',
             'STREET': '405 BLUFF AVE N', 'CITY': 'PRAIRIE FARM',
             'STATE': 'WI',
-            'ZIP': '54762',
+            'zip': '54762',
             'NTEE_CD': 'K31',
             'service_summary': 'Food Banks & Pantries',
             'service_type': 'FOOD',
@@ -269,7 +269,7 @@ def example_IRS_service_data():
                       'LEGAL AI IRST DEFENSE LEGAL AID FIRST DEFENSE LEGAL AID',
             'STREET': '1111 N WELLS ST STE 308A',
             'CITY': 'CHICAGO', 'STATE': 'IL',
-            'ZIP': '60610', 'NTEE_CD': 'I80',
+            'zip': '60610', 'NTEE_CD': 'I80',
             'service_summary': 'Legal Services',
             'service_type': 'RESOURCES',
             'service_subtype': 'Legal Assistance',
@@ -333,7 +333,7 @@ def test_fuzzy_match_with_st_saint_discrepancy(
     insert_services(example_IRS_service_data, mock_mongo_client.shelter, 'tmpIRS')
     refresh_ngrams(mock_mongo_client.shelter, 'tmpIRS')
     name = example_IRS_search_object_with_spelled_out_saint['NAME']
-    zip_code = example_IRS_search_object_with_spelled_out_saint['ZIP']
+    zip_code = example_IRS_search_object_with_spelled_out_saint['zip']
     with pytest.raises(NotImplementedError):
         locate_potential_duplicate(
             name, zip_code, mock_mongo_client.shelter, 'tmpIRS'
@@ -357,7 +357,7 @@ def test_fuzzy_match(
     insert_services(example_IRS_service_data, client, 'pytest_fuzzy_test')
     refresh_ngrams(client, 'pytest_fuzzy_test')
     name = example_IRS_search_object_with_spelled_out_saint['NAME']
-    zip_code = example_IRS_search_object_with_spelled_out_saint['ZIP']
+    zip_code = example_IRS_search_object_with_spelled_out_saint['zip']
     dc = locate_potential_duplicate(
         name, zip_code, client, 'pytest_fuzzy_test'
     )
