@@ -11,7 +11,11 @@ import requests
 from datetime import datetime, date
 
 if __package__:  # if script is being run as a module
-    from ..shelterapputils.utils import check_similarity, refresh_ngrams
+    from ..shelterapputils.utils import (
+        check_similarity, refresh_ngrams,
+        make_ngrams, locate_potential_duplicate,
+        distance, insert_services, client
+    )
 else:  # if script is being run as a file
     _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if _i not in sys.path:
@@ -21,18 +25,12 @@ else:  # if script is being run as a file
     from shelterapputils.utils import (
         check_similarity, refresh_ngrams,
         make_ngrams, locate_potential_duplicate,
-        distance, insert_services
+        distance, insert_services, client
     )
 
 # set the DB user name and password in config
 with open('IRS/config.json', 'r') as con:
     config = json.load(con)
-
-# Establish global variables
-client = MongoClient(
-    "mongodb+srv://" + os.environ.get('DBUSERNAME') + ":" + os.environ.get('PW')
-    + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
-)['shelter']
 
 
 def scrape_updated_date():

@@ -11,7 +11,11 @@ import requests
 from datetime import datetime, date
 
 if __package__:  # if script is being run as a module
-    from ..shelterapputils.utils import check_similarity, refresh_ngrams
+    from ..shelterapputils.utils import (
+        check_similarity, refresh_ngrams,
+        make_ngrams, locate_potential_duplicate,
+        distance, insert_services, client
+    )
 else:  # if script is being run as a file
     _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     if _i not in sys.path:
@@ -21,13 +25,8 @@ else:  # if script is being run as a file
     from shelterapputils.utils import (
         check_similarity, refresh_ngrams,
         make_ngrams, locate_potential_duplicate,
-        distance, insert_services
+        distance, insert_services, client
     )
-# Establish global variables
-client = MongoClient(
-    "mongodb+srv://" + os.environ.get('DBUSERNAME') + ":" + os.environ.get('PW')
-    + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
-)['shelter']
 
 
 def grab_data():
@@ -136,14 +135,6 @@ def main(client, check_collection, dump_collection, dupe_collection):
     except KeyError:
         print('Key Error')
         pass
-    print('updating scraped update date in data-sources collection')
-    try:
-        client['data_sources'].update_one(
-            {"name": "irs_exempt_organizations"},
-            {'$set': {'last_updated': datetime.strftime(scraped_update_date, '%m/%d/%Y')}}
-        )
-    except errors.OperationFailure as e:
-        print(e)
     df = grab_data()
     print('purging duplicates from existing HUD collection')
     if client[dump_collection].estimated_document_count() > 0:
@@ -171,6 +162,14 @@ def main(client, check_collection, dump_collection, dupe_collection):
         print(f'final df shape: {df.shape}')
         if len(df) > 0:
             insert_services(df.to_dict('records'), client, dump_collection)
+        print('updating scraped update date in data-sources collection')
+        try:
+            client['data_sources'].update_one(
+                {"name": "irs_exempt_organizations"},
+                {'$set': {'last_updated': datetime.strftime(scraped_update_date, '%m/%d/%Y')}}
+            )
+        except errors.OperationFailure as e:
+            print(e)
 
 
 if __name__ == "__main__":
