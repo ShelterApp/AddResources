@@ -49,6 +49,8 @@ def grab_data():
         'City': "city", 'State': 'state', 'Zip Code': "zip", 'Phone': "phone",
         'Email Address': "email", 'Web Site URL': "url", 'Office Hours': "hours"},
         inplace=True)
+    df.applymap(lambda x: x if not x or not isinstance(x, str) else x.strip())
+    df['zip'] = df['zip'].apply(lambda z: z[0:5] if "-" in z else z)
     df['source'] = ['CareerOneStop'] * len(df)
     df['service_summary'] = 'Employment Assistance'
     return df
