@@ -15,7 +15,6 @@ def grab_data(scraper_config: ScraperConfig) -> pd.DataFrame:
     Returns:
         DataFrame: Pandas DataFrame containing processed data
     """
-    # data_url = 'https://www.careeronestop.org/TridionMultimedia/tcm24-49673_XLS_AJC_Data_11172020.xls'
     if scraper_config.data_format == "JSON":
         df: pd.DataFrame = pd.read_json(scraper_config.data_url)
     elif scraper_config.data_format == "CSV":
@@ -46,9 +45,8 @@ def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
     """
 
     :param client:              MongoDB Client for MongoDB operations.
-    :param check_collection:    This is the master collection that new scraped data will be merged into.
-                                It is also the collection that will be checked for duplicates.
-    :param dump_collection:     This is the temporary holding collection for freshly scraped data.
+    :param check_collection:    The collection that will be checked for duplicates.
+    :param dump_collection:     The temporary holding collection for freshly scraped data.
     :param dupe_collection:     This is the temporary collection that duplicates are put into.
     :return:
     """
@@ -74,7 +72,9 @@ def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
         duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
         print(f'inserting {duplicate_df.shape[0]} services dupes into the dupe collection')
         if len(duplicate_df) > 0:
-            insert_services(duplicate_df.to_dict('records'), client, scraper_config.dupe_collection)
+            insert_services(
+                duplicate_df.to_dict('records'), client, scraper_config.dupe_collection
+            )
         df = df.drop(found_duplicates).reset_index(drop=True)
         print(f'final df shape: {df.shape}')
         if len(df) > 0:

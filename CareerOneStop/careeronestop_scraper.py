@@ -30,7 +30,8 @@ def grab_data():
     Returns:
         DataFrame: Pandas DataFrame containing processed data
     """
-    data_url = 'https://www.careeronestop.org/TridionMultimedia/tcm24-49673_XLS_AJC_Data_11172020.xls'
+    data_url = 'https://www.careeronestop.org/TridionMultimedia' \
+        '/tcm24-49673_XLS_AJC_Data_11172020.xls'
     df = pd.read_excel(
         data_url,
         usecols=[
@@ -56,13 +57,14 @@ def grab_data():
     return df
 
 
-def main(client: MongoClient, check_collection: str, dump_collection: str, dupe_collection: str):
+def main(
+    client: MongoClient, check_collection: str, dump_collection: str, dupe_collection: str
+):
     """
 
     :param client:              MongoDB Client for MongoDB operations.
-    :param check_collection:    This is the master collection that new scraped data will be merged into.
-                                It is also the collection that will be checked for duplicates.
-    :param dump_collection:     This is the temporary holding collection for freshly scraped data.
+    :param check_collection:    The master collection that will be checked for duplicates.
+    :param dump_collection:     The temporary holding collection for freshly scraped data.
     :param dupe_collection:     This is the temporary collection that duplicates are put into.
     :return:
     """
@@ -96,7 +98,7 @@ def main(client: MongoClient, check_collection: str, dump_collection: str, dupe_
         print('updating scraped update date in data-sources collection')
         try:
             client['data_sources'].update_one(
-                {"name": "irs_exempt_organizations"},
+                {"name": "career_one_stop"},
                 {'$set': {'last_updated': datetime.strftime(datetime.now(), '%m/%d/%Y')}}
             )
         except errors.OperationFailure as e:
