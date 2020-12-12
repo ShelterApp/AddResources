@@ -1,6 +1,19 @@
-from shelterapputils.scraper_config import ScraperConfig
-from shelterapputils.scraper_utils import main_scraper
-from shelterapputils.utils import client
+import os
+import sys
+
+if __package__:  # if script is being run as a module
+    from ..shelterapputils.scraper_config import ScraperConfig
+    from ..shelterapputils.scraper_utils import main_scraper
+    from ..shelterapputils.utils import client
+else:  # if script is being run as a file
+    _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _i not in sys.path:
+        # add parent directory to sys.path so utils module is accessible
+        sys.path.insert(0, _i)
+    del _i  # clean up global name space
+    from shelterapputils.scraper_config import ScraperConfig
+    from shelterapputils.scraper_utils import main_scraper
+    from shelterapputils.utils import client
 
 california_food_resources_scraper_config: ScraperConfig = ScraperConfig(
     source="CaliforniaFoodResources",
@@ -24,7 +37,7 @@ california_food_resources_scraper_config: ScraperConfig = ScraperConfig(
     check_collection="services",
     dump_collection="tmpCaliforniaFoodResources",
     dupe_collection="tmpCaliforniaFoodResourcesFoundDuplicates",
-    data_source_collection_name="california_food_resources_scraper"
+    data_source_collection_name="california_food_resources"
 )
 
 

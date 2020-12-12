@@ -13,7 +13,8 @@ class ScraperConfig:
                  check_collection: str,
                  dump_collection: str,
                  dupe_collection: str,
-                 data_source_collection_name: str):
+                 data_source_collection_name: str,
+                 collection_dupe_field: str):
         self._source: str = source
         self._data_url: str = data_url
         self._data_format: str = data_format
@@ -25,6 +26,7 @@ class ScraperConfig:
         self._dump_collection: str = dump_collection
         self._dupe_collection: str = dupe_collection
         self._data_source_collection_name: str = data_source_collection_name
+        self._collection_dupe_field: str = collection_dupe_field
 
     @property
     def source(self) -> str:
@@ -65,7 +67,11 @@ class ScraperConfig:
     @property
     def dupe_collection(self) -> str:
         return self._dupe_collection
-    
+
     @property
     def data_source_collection_name(self) -> str:
         return self._data_source_collection_name
+
+    @property
+    def collection_dupe_field(self) -> str:
+        return self._collection_dupe_field
