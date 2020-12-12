@@ -165,7 +165,7 @@ def main(client, check_collection, dump_collection, dupe_collection):
         print('updating scraped update date in data-sources collection')
         try:
             client['data_sources'].update_one(
-                {"name": "irs_exempt_organizations"},
+                {"name": "hud_pit_hic_data"},
                 {'$set': {'last_updated': datetime.strftime(scraped_update_date, '%m/%d/%Y')}}
             )
         except errors.OperationFailure as e:
