@@ -13,7 +13,7 @@ if __package__:  # if script is being run as a module
         check_similarity, locate_potential_duplicate,
         insert_services, client
     )
-    from ..shelterapputils.scraper_config import ScraperConfig
+    from ..shelterapputils.base_scraper import BaseScraper
     from ..shelterapputils.scraper_utils import main_scraper
 else:  # if script is being run as a file
     _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,35 +25,40 @@ else:  # if script is being run as a file
         check_similarity, locate_potential_duplicate,
         insert_services, client
     )
-    from shelterapputils.scraper_config import ScraperConfig
-    from shelterapputils.scraper_utils import main_scraper
+    from shelterapputils.base_scraper import BaseScraper
 
 
-def scrape_updated_date():
-    datasets_url: str = 'https://www.careeronestop.org/Developers/Data/data-downloads.aspx'
-    resp = requests.get(datasets_url)
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    table_rows = soup.find_all('tr')
-    found = False
-    for r in table_rows:
-        for i, d in enumerate(r.find_all('td')):
-            if i == 0:
-                if d.text.strip() == 'Comprehensive and Affiliate American Job Centers':
-                    found = True
-            if i == 1 and found is True:
-                month_string = d.text
-                found = False
-    scraped_update_date = datetime.strptime(
-        month_string, '%B %Y'
-    )
-    print(month_string)
-    return scraped_update_date.date()
+class COS_Scraper(BaseScraper):
+    def scrape_updated_date(self) -> str:
+        resp = super().scrape_updated_date()
+        soup = BeautifulSoup(resp, 'html.parser')
+        table_rows = soup.find_all('tr')
+        found = False
+        for r in table_rows:
+            for i, d in enumerate(r.find_all('td')):
+                if i == 0:
+                    if d.text.strip() == 'Comprehensive and Affiliate American Job Centers':
+                        found = True
+                if i == 1 and found is True:
+                    month_string = d.text
+                    found = False
+        scraped_update_date = datetime.strptime(
+            month_string, '%B %Y'
+        )
+        print(month_string)
+        return scraped_update_date.date()
+
+    def grab_data(self) -> pd.DataFrame:
+        df = super().grab_data()
+        df['service_summary'] = self.service_summary
+        return df
 
 
-career_one_stop_scraper_config: ScraperConfig = ScraperConfig(
+cos_scraper = COS_Scraper(
     source="CareerOneStop",
     data_url='https://www.careeronestop.org/TridionMultimedia'
     '/tcm24-49673_XLS_AJC_Data_11172020.xls',
+    data_page_url='https://www.careeronestop.org/Developers/Data/data-downloads.aspx',
     data_format="XLS",
     extract_usecols=[
         'ID', 'Name of Center', 'Address1', 'Address2',
@@ -80,18 +85,10 @@ career_one_stop_scraper_config: ScraperConfig = ScraperConfig(
 
 
 if __name__ == "__main__":
-    scraped_update_date = scrape_updated_date()
-    try:
-        stored_update_date = client['data-sources'].find_one(
-            {"name": "career_one_stop"}
-        )['last_updated']
-        stored_update_date = datetime.strptime(
-            str(stored_update_date), '%Y-%m-%d %H:%M:%S'
-        ).date()
-    except Exception as e:
-        print(e)
+    scraped_update_date = cos_scraper.scrape_updated_date()
+    stored_update_date = cos_scraper.retrieve_last_scraped_date()
     if stored_update_date is not False:
         if scraped_update_date < stored_update_date:
             print('No new data. Goodbye...')
             sys.exit()
-    main_scraper(client, career_one_stop_scraper_config)
+    cos_scraper.main_scraper(client)

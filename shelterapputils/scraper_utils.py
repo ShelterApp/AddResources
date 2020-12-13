@@ -45,38 +45,8 @@ def grab_data(scraper_config: ScraperConfig) -> pd.DataFrame:
     return df
 
 
-def purge_collection_duplicates(
-    df: pd.DataFrame, client: MongoClient, scraper_config: ScraperConfig
-) -> pd.DataFrame:
-    """Function to check the pre-processed data and
-    delete exact dupes that already exist in the tmp collection
-
-    Args:
-        df (pd.DataFrame): pre-processed data from grab_data()
-        client (MongoClient): MongoDB connection instance
-        scraper_config (ScraperConfig): Instance of the ScraperConfig class
-
-    Returns:
-        pd.DataFrame: DataFrame free of exact duplicates
-    """
-    found_duplicates = []
-    coll = client[scraper_config.dump_collection]
-    for i in range(len(df)):
-        idx = int(df.loc[i, scraper_config.collection_dupe_field])
-        dupe = coll.find_one(
-            {scraper_config.collection_dupe_field: idx}
-        )
-        if dupe is not False:
-            found_duplicates.append(i)
-    duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
-    print(f'inserting {scraper_config.source} dupes into the dupe collection')
-    insert_services(duplicate_df.to_dict('records'), client, scraper_config.dupe_collection)
-    df = df.drop(found_duplicates).reset_index(drop=True)
-    return df
-
-
 def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
-    """Base function for ingesting raw data and preparing it for depositing it in MongoDB
+    """Base function for ingesting raw data, preparing it and depositing it in MongoDB
 
     Args:
         client (MongoClient): connection to the MongoDB instance
@@ -85,7 +55,7 @@ def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
     df = grab_data(scraper_config)
     if client[scraper_config.dump_collection].estimated_document_count() > 0:
         print('purging duplicates from existing CareerOneStop collection')
-        df = purge_collection_duplicates(df)
+        df = scraper_config.purge_collection_duplicates(df)
     if client[scraper_config.check_collection].estimated_document_count() == 0:
         # No need to check for duplicates in an empty collection
         insert_services(df.to_dict('records'), client, scraper_config.dump_collection)
@@ -114,7 +84,7 @@ def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
         print('updating scraped update date in data-sources collection')
         try:
             client['data_sources'].update_one(
-                {"name": "irs_exempt_organizations"},
+                {"name": scraper_config.data_source_collection_name},
                 {'$set': {'last_updated': datetime.strftime(datetime.now(), '%m/%d/%Y')}}
             )
         except errors.OperationFailure as e:
