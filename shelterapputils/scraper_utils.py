@@ -9,11 +9,13 @@ from shelterapputils.utils import insert_services, locate_potential_duplicate, c
 
 
 def grab_data(scraper_config: ScraperConfig) -> pd.DataFrame:
-    """Access hosted HUD csv file,
-       clean things up a bit and add code descriptions.
+    """Base function for retrieving raw data and performing basic pre-processing
+
+    Args:
+        scraper_config (ScraperConfig): Instance of the ScraperConfig class
 
     Returns:
-        DataFrame: Pandas DataFrame containing processed data
+        pd.DataFrame: DataFrame of pre-processed data
     """
     if scraper_config.data_format == "JSON":
         df: pd.DataFrame = pd.read_json(scraper_config.data_url)
@@ -27,12 +29,14 @@ def grab_data(scraper_config: ScraperConfig) -> pd.DataFrame:
             scraper_config.data_url,
             usecols=scraper_config.extract_usecols
         )
+    print(f'initial shape: {df.shape}')
     df.drop_duplicates(
         subset=scraper_config.drop_duplicates_columns,
         inplace=True,
         ignore_index=True
     )
     df.rename(columns=scraper_config.rename_columns, inplace=True)
+    # One-Liner to trim all the strings in the DataFrame
     df.applymap(lambda x: x if not x or not isinstance(x, str) else x.strip())
     df['zip'] = df['zip'].astype("str")
     df['zip'] = df['zip'].apply(lambda z: z[0:5] if "-" in z else z)
@@ -42,18 +46,16 @@ def grab_data(scraper_config: ScraperConfig) -> pd.DataFrame:
 
 
 def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
-    """
+    """Base function for ingesting raw data, preparing it and depositing it in MongoDB
 
-    :param client:              MongoDB Client for MongoDB operations.
-    :param check_collection:    The collection that will be checked for duplicates.
-    :param dump_collection:     The temporary holding collection for freshly scraped data.
-    :param dupe_collection:     This is the temporary collection that duplicates are put into.
-    :return:
+    Args:
+        client (MongoClient): connection to the MongoDB instance
+        scraper_config (ScraperConfig): instance of the ScraperConfig class
     """
     df = grab_data(scraper_config)
-    print('purging duplicates from existing CareerOneStop collection')
     if client[scraper_config.dump_collection].estimated_document_count() > 0:
-        df = df  # purge_HUD_duplicates(df, client, dump_collection, dupe_collection)
+        print('purging duplicates from existing CareerOneStop collection')
+        df = scraper_config.purge_collection_duplicates(df)
     if client[scraper_config.check_collection].estimated_document_count() == 0:
         # No need to check for duplicates in an empty collection
         insert_services(df.to_dict('records'), client, scraper_config.dump_collection)
@@ -82,7 +84,7 @@ def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
         print('updating scraped update date in data-sources collection')
         try:
             client['data_sources'].update_one(
-                {"name": "irs_exempt_organizations"},
+                {"name": scraper_config.data_source_collection_name},
                 {'$set': {'last_updated': datetime.strftime(datetime.now(), '%m/%d/%Y')}}
             )
         except errors.OperationFailure as e:
