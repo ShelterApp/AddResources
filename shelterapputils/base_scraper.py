@@ -58,7 +58,7 @@ class BaseScraper:
             return stored_update_date
         return False
 
-    def grab_data(self) -> pd.DataFrame:
+    def grab_data(self, df=None) -> pd.DataFrame:
         """Base function for retrieving raw data and performing basic pre-processing
 
         Returns:
@@ -68,21 +68,24 @@ class BaseScraper:
             df: pd.DataFrame = pd.read_json(self.data_url)
         elif self.data_format == "CSV":
             df = pd.read_csv(self.data_url, usecols=self.extract_usecols)
+        elif self.data_format == "DF":
+            df = df
         else:
             df = pd.read_excel(self.data_url, usecols=self.extract_usecols)
         print(f'initial shape: {df.shape}')
         df.drop_duplicates(
-            subset=self.drop_duplicates_columns,
+            subset=list(self.drop_duplicates_columns),
             inplace=True,
             ignore_index=True
         )
         df.rename(columns=self.rename_columns, inplace=True)
         # One-Liner to trim all the strings in the DataFrame
         df.applymap(lambda x: x if not x or not isinstance(x, str) else x.strip())
-        df['zip'] = df['zip'].astype("str")
-        df['zip'] = df['zip'].apply(
-            lambda z: z[0:5] if "-" in z else z
-        )
+        if 'zip' in list(df.columns):
+            df['zip'] = df['zip'].astype("str")
+            df['zip'] = df['zip'].apply(
+                lambda z: z[0:5] if "-" in z else z
+            )
         df['source'] = [self.source] * len(df)
         return df
 
