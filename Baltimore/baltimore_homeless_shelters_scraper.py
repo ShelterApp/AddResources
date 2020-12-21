@@ -71,3 +71,5 @@ bhs_scraper = BHS_Scraper(
 
 if __name__ == '__main__':
     bhs_scraper.main_scraper(client)
+
+
