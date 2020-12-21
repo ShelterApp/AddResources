@@ -26,11 +26,13 @@ class BaseScraper:
                  dump_collection: str,
                  dupe_collection: str,
                  data_source_collection_name: str,
-                 collection_dupe_field: str) -> None:
+                 collection_dupe_field: str,
+                 encoding: str = 'utf-8') -> None:
         self._source: str = source
         self._data_url: str = data_url
         self._data_page_url: str = data_page_url
         self._data_format: str = data_format
+        self._encoding: str = encoding
         self._extract_usecols: List[str] = extract_usecols
         self._drop_duplicates_columns: List[str] = drop_duplicates_columns
         self._rename_columns: dict = rename_columns
@@ -67,7 +69,9 @@ class BaseScraper:
         if self.data_format == "JSON":
             df: pd.DataFrame = pd.read_json(self.data_url)
         elif self.data_format == "CSV":
-            df = pd.read_csv(self.data_url, usecols=self.extract_usecols)
+            df = pd.read_csv(
+                self.data_url, encoding=self.encoding, usecols=self.extract_usecols
+            )
         elif self.data_format == "DF":
             df = df
         else:
@@ -173,6 +177,10 @@ class BaseScraper:
     @property
     def data_format(self) -> str:
         return self._data_format
+
+    @property
+    def encoding(self) -> str:
+        return self._encoding
 
     @property
     def extract_usecols(self) -> List[str]:

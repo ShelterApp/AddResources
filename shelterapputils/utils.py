@@ -122,6 +122,6 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     dupe_candidate = coll.find_one(
         {"$text": {"$search": ' '.join(grammed_name)}, 'zip': zipcode}
     )
-    if dupe_candidate:
+    if dupe_candidate is not False:
         return dupe_candidate["name"]
     return False

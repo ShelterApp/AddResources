@@ -10,23 +10,16 @@ from collections import OrderedDict
 import requests
 from datetime import datetime, date
 
-if __package__:  # if script is being run as a module
-    from ..shelterapputils.utils import (
-        check_similarity, refresh_ngrams,
-        make_ngrams, locate_potential_duplicate,
-        distance, insert_services, client
-    )
-else:  # if script is being run as a file
-    _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if _i not in sys.path:
-        # add parent directory to sys.path so utils module is accessible
-        sys.path.insert(0, _i)
-    del _i  # clean up global name space
-    from shelterapputils.utils import (
-        check_similarity, refresh_ngrams,
-        make_ngrams, locate_potential_duplicate,
-        distance, insert_services, client
-    )
+_i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _i not in sys.path:
+    # add parent directory to sys.path so utils module is accessible
+    sys.path.insert(0, _i)
+del _i  # clean up global name space
+from shelterapputils.utils import (
+    check_similarity, refresh_ngrams,
+    make_ngrams, locate_potential_duplicate,
+    distance, insert_services, client
+)
 
 # set the DB user name and password in config
 with open('IRS/config.json', 'r') as con:
