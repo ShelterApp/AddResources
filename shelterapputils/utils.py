@@ -5,6 +5,7 @@ import re
 import os
 
 # Establish global variables
+
 client = MongoClient(
     "mongodb+srv://" + os.environ.get('DBUSERNAME') + ":" + os.environ.get('PW')
     + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
