@@ -1,13 +1,16 @@
+import json
+from bson import ObjectId
+import os
+
 import pytest
-from IRS.irs_scraper import (
+import mongomock
+from pymongo import MongoClient, TEXT
+
+from IRS import irs_scraper
+from shelterapputils.utils import (
     make_ngrams, distance, insert_services, check_similarity,
     locate_potential_duplicate, refresh_ngrams
 )
-import json
-from pymongo import MongoClient, TEXT
-from bson import ObjectId
-import mongomock
-import os
 
 
 @pytest.fixture
@@ -21,9 +24,9 @@ def mock_config_object():
 def example_IRS_search_object_with_spelled_out_saint():
     return {
         '_id': ObjectId('5f137b06236870dae2f1f5e4'),
-        'STREET': 'PO BOX 376',
-        'CITY': 'PR DU CHIEN',
-        'NAME': 'SAINT FERIOLE ISLAND PARK',
+        'street': 'PO BOX 376',
+        'city': 'PR DU CHIEN',
+        'name': 'SAINT FERIOLE ISLAND PARK',
         'NGRAMS': 'SAINT F AINT FE INT FER NT FERI T FERIO  FERIOL FERIOLE ERIOLE  RIOLE '
                   'I IOLE IS OLE ISL LE ISLA E ISLAN  ISLAND ISLAND  SLAND P LAND PA AND '
                   'PAR ND PARK SAINT FE AINT FER INT FERI NT FERIO T FERIOL  FERIOLE '
@@ -69,7 +72,7 @@ def example_IRS_search_object_with_spelled_out_saint():
                   'FERIOLE ISLAND PAR INT FERIOLE ISLAND PARK SAINT FERIOLE '
                   'ISLAND PAR AINT FERIOLE ISLAND PARK SAINT FERIOLE ISLAND PARK',
         'service_summary': 'Ambulatory Health Center, Community Clinic',
-        'STATE': 'WI',
+        'state': 'WI',
         'zip': '53821'
     }
 
@@ -79,9 +82,9 @@ def example_IRS_service_data():
     return [
         {
             '_id': ObjectId('5f137b06236870dae2f1f5e4'),
-            'STREET': 'PO BOX 376',
-            'CITY': 'PR DU CHIEN',
-            'NAME': 'ST FERIOLE ISLAND PARK',
+            'street': 'PO BOX 376',
+            'city': 'PR DU CHIEN',
+            'name': 'ST FERIOLE ISLAND PARK',
             'NGRAMS': 'ST FERI T FERIO  FERIOL FERIOLE ERIOLE  RIOLE I IOLE IS '
             'OLE ISL LE ISLA E ISLAN  ISLAND ISLAND  SLAND P LAND PA AND PAR ND PARK ST '
             'FERIO T FERIOL  FERIOLE FERIOLE  ERIOLE I RIOLE IS IOLE ISL OLE ISLA LE '
@@ -108,13 +111,13 @@ def example_IRS_service_data():
             'FERIOLE ISLAND PARK ST FERIOLE ISLAND PAR T FERIOLE ISLAND PARK ST FERIOLE '
             'ISLAND PARK',
             'service_summary': 'Ambulatory Health Center, Community Clinic',
-            'STATE': 'WI',
+            'state': 'WI',
             'zip': '53821'
         },
         {
             '_id': ObjectId('5f7a5ab32410168bf92a4cbc'),
             'EIN': 10934058,
-            'NAME': 'PRAIRIE FARM RIDGELAND FOOD PANTRY',
+            'name': 'PRAIRIE FARM RIDGELAND FOOD PANTRY',
             'NGRAMS': 'PRAIRIE RAIRIE  AIRIE F IRIE FA RIE FAR IE FARM E FARM   FARM R FARM '
                       'RI ARM RID RM RIDG M RIDGE  RIDGEL RIDGELA IDGELAN DGELAND GELAND  '
                       'ELAND F LAND FO AND FOO ND FOOD D FOOD   FOOD P FOOD PA OOD PAN OD '
@@ -221,8 +224,8 @@ def example_IRS_service_data():
                       'PRAIRIE FARM RIDGELAND FOOD PANT RAIRIE FARM RIDGELAND FOOD PANTR '
                       'AIRIE FARM RIDGELAND FOOD PANTRY PRAIRIE FARM RIDGELAND FOOD PANTR '
                       'RAIRIE FARM RIDGELAND FOOD PANTRY PRAIRIE FARM RIDGELAND FOOD PANTRY',
-            'STREET': '405 BLUFF AVE N', 'CITY': 'PRAIRIE FARM',
-            'STATE': 'WI',
+            'street': '405 BLUFF AVE N', 'CITY': 'PRAIRIE FARM',
+            'state': 'WI',
             'zip': '54762',
             'NTEE_CD': 'K31',
             'service_summary': 'Food Banks & Pantries',
@@ -233,7 +236,7 @@ def example_IRS_service_data():
         {
             '_id': ObjectId('5f7a5ab32410168bf92a4ca1'),
             'EIN': 10729555,
-            'NAME': 'FIRST DEFENSE LEGAL AID',
+            'name': 'FIRST DEFENSE LEGAL AID',
             'NGRAMS': 'FIRST D IRST DE RST DEF ST DEFE T DEFEN  DEFENS DEFENSE EFENSE  FENSE '
                       'L ENSE LE NSE LEG SE LEGA E LEGAL  LEGAL  LEGAL A EGAL AI GAL AID '
                       'FIRST DE IRST DEF RST DEFE ST DEFEN T DEFENS  DEFENSE DEFENSE  '
@@ -267,8 +270,8 @@ def example_IRS_service_data():
                       'RST DEFENSE LEGAL AI ST DEFENSE LEGAL AID FIRST DEFENSE LEGAL '
                       'A IRST DEFENSE LEGAL AI RST DEFENSE LEGAL AID FIRST DEFENSE '
                       'LEGAL AI IRST DEFENSE LEGAL AID FIRST DEFENSE LEGAL AID',
-            'STREET': '1111 N WELLS ST STE 308A',
-            'CITY': 'CHICAGO', 'STATE': 'IL',
+            'street': '1111 N WELLS ST STE 308A',
+            'city': 'CHICAGO', 'STATE': 'IL',
             'zip': '60610', 'NTEE_CD': 'I80',
             'service_summary': 'Legal Services',
             'service_type': 'RESOURCES',
@@ -296,7 +299,7 @@ def test_check_similarity_st_vs_saint():
 
 
 def test_make_ngrams(example_IRS_service_data):
-    service_name = example_IRS_service_data[1]['NAME']
+    service_name = example_IRS_service_data[1]['name']
     service_ngrams = example_IRS_service_data[1]['NGRAMS']
     print()
     assert ' '.join(make_ngrams(service_name)) == service_ngrams
@@ -332,7 +335,7 @@ def test_fuzzy_match_with_st_saint_discrepancy(
 ):
     insert_services(example_IRS_service_data, mock_mongo_client.shelter, 'tmpIRS')
     refresh_ngrams(mock_mongo_client.shelter, 'tmpIRS')
-    name = example_IRS_search_object_with_spelled_out_saint['NAME']
+    name = example_IRS_search_object_with_spelled_out_saint['name']
     zip_code = example_IRS_search_object_with_spelled_out_saint['zip']
     with pytest.raises(NotImplementedError):
         locate_potential_duplicate(
@@ -356,7 +359,7 @@ def test_fuzzy_match(
     client.create_collection('pytest_fuzzy_test')
     insert_services(example_IRS_service_data, client, 'pytest_fuzzy_test')
     refresh_ngrams(client, 'pytest_fuzzy_test')
-    name = example_IRS_search_object_with_spelled_out_saint['NAME']
+    name = example_IRS_search_object_with_spelled_out_saint['name']
     zip_code = example_IRS_search_object_with_spelled_out_saint['zip']
     dc = locate_potential_duplicate(
         name, zip_code, client, 'pytest_fuzzy_test'

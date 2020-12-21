@@ -9,24 +9,17 @@ import re
 from pymongo import MongoClient, errors
 from tqdm import tqdm
 
-if __package__:  # if script is being run as a module
-    from ..shelterapputils.utils import (
-        check_similarity, locate_potential_duplicate,
-        insert_services, client
-    )
-    from ..shelterapputils.base_scraper import BaseScraper
-else:  # if script is being run as a file
-    _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if _i not in sys.path:
-        # add parent directory to sys.path so utils module is accessible
-        sys.path.insert(0, _i)
-    del _i  # clean up global name space
-    from shelterapputils.utils import (
-        check_similarity, locate_potential_duplicate,
-        insert_services, client
-    )
-    from shelterapputils.base_scraper import BaseScraper
-    from shelterapputils.scraper_utils import main_scraper
+_i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _i not in sys.path:
+    # add parent directory to sys.path so utils module is accessible
+    sys.path.insert(0, _i)
+del _i  # clean up global name space
+from shelterapputils.utils import (
+    check_similarity, locate_potential_duplicate,
+    insert_services, client
+)
+from shelterapputils.base_scraper import BaseScraper
+from shelterapputils.scraper_utils import main_scraper
 
 
 class HUD_Scraper(BaseScraper):
