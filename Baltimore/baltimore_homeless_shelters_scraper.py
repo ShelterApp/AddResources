@@ -39,7 +39,7 @@ class BHS_Scraper(BaseScraper):
         df = pd.read_csv(self.data_url, usecols=self.extract_usecols)
         df = df.dropna(subset=['zipCode', 'Location 1']).reset_index(drop=True)
         df.rename(columns=self.rename_columns, inplace=True)
-        df[['adress', 'state']] = df.adress.str.split('\n', expand=True)
+        df[['address', 'state']] = df.address.str.split('\n', expand=True)
         df[['state']] = df['state'].str[-2:]
         df[['zip']] = [str(int(x)) for x in df['zip']]
         return df
@@ -57,8 +57,8 @@ bhs_scraper = BHS_Scraper(
         "name", "type", "zipCode", "Location 1"
     ],
     rename_columns={
-        "Location 1": "adress",
-        "zipCode": "zip", "type":"serviceSummary"
+        "Location 1": "address",
+        "zipCode": "zip", "type": "serviceSummary"
     },
     service_summary="Homeless Shelter",
     check_collection="services",

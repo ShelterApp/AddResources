@@ -76,7 +76,7 @@ CSS = CanadaSheltersScraper(
     dupe_collection="tmpCanadaSheltersFoundDuplicates",
     data_source_collection_name="canada_shelters",
     collection_dupe_field='name',
-    encode='latin-1'
+    encoding='latin-1'
 )
 
 if __name__ == "__main__":
