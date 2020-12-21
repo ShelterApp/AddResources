@@ -53,10 +53,10 @@ cfr_scraper = CFR_Scraper(
         "Zip Code", "County", "Phone"
     ],
     rename_columns={
-        "Name": "name", "Street Address": "address",
+        "Name": "name", "Street Address": "address1",
         "City": "city", "State": "state", "Zip Code": "zip",
         "County": "county", "Phone": "phone",
-        "Resource Type": "resource_type", "Web Link": "url"
+        "Resource Type": "type", "Web Link": "website"
     },
     service_summary="Food Pantry",
     check_collection="services",

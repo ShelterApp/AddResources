@@ -57,7 +57,7 @@ bhs_scraper = BHS_Scraper(
         "name", "type", "zipCode", "Location 1"
     ],
     rename_columns={
-        "Location 1": "address",
+        "Location 1": "address1",
         "zipCode": "zip", "type": "serviceSummary"
     },
     service_summary="Homeless Shelter",

@@ -97,21 +97,21 @@ def grab_data(config, code_dict):
     for i in tqdm(range(len(df))):
         try:
             c = df.loc[i, 'NTEE_CD']
-            code_descriptions.append(code_dict[c]['service_summary'])
+            code_descriptions.append(code_dict[c]['serviceSummary'])
             code_types.append(code_dict[c]['type'])
             code_subtypes.append(code_dict[c]['sub-type'])
         except KeyError:
             c = df.loc[i, 'NTEE_CD'][:-1]
             try:
-                code_descriptions.append(code_dict[c]['service_summary'])
+                code_descriptions.append(code_dict[c]['serviceSummary'])
                 code_types.append(code_dict[c]['type'])
                 code_subtypes.append(code_dict[c]['sub-type'])
             except KeyError:
                 code_descriptions.append('summary not found.')
                 code_types.append('type not found.')
                 code_subtypes.append('sub-type not found.')
-    df['service_summary'] = code_descriptions
-    df['service_type'] = code_types
+    df['serviceSummary'] = code_descriptions
+    df['type'] = code_types
     df['service_subtype'] = code_subtypes
     df['source'] = ['IRS'] * len(df)
     print(f'completed compiling dataframe of shape: {df.shape}')

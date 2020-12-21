@@ -45,7 +45,7 @@ class NWH_Scraper(BaseScraper):
         df = super().grab_data(df=df)
         df['full address'].replace('', np.nan, inplace=True)
         df = df.dropna(subset=['full address']).reset_index(drop=True)
-        df['address'] = df['full address'].apply(lambda x: re.search("(.*), \n", x).group(1))
+        df['address1'] = df['full address'].apply(lambda x: re.search("(.*), \n", x).group(1))
         cities = []
         for i in range(len(df)):
             try:
@@ -84,9 +84,9 @@ nwh_scraper = NWH_Scraper(
     ],
     rename_columns={
         "Summary": "summary", "Full Address": "full address",
-        'Email': 'email', "Website": "url", "Category": "service_summary"
+        'Email': 'contactEmail', "Website": "website", "Category": "serviceSummary"
     },
-    service_summary="service_summary",
+    service_summary="serviceSummary",
     check_collection="services",
     dump_collection="tmpNWHospitality",
     dupe_collection="tmpNWHospitalityFoundDuplicates",
