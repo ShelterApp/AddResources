@@ -13,6 +13,11 @@ HEALTH	| Medical Clinic, Mental Health Services
 RESOURCES	| Miscellaneous Services, Support Services, Legal Assistance, Senior Resources
 WORK	| 
 
+#### Scrapping guidelines and rules.
+We have to have follow general scraping guilelines mentioned here for all our scrappers.
+https://github.com/ShelterApp/AddResources/wiki#scraping-guidelines--standards
+
+
 #### This repo is created to Add resources by web crawling on below open data platforms
 (https://drive.google.com/drive/folders/1V652EVRsCLHznKfHXIHylIREYbmsc3MB?usp=sharing)
 
