@@ -1,7 +1,7 @@
 import os
 import sys
 from datetime import datetime
-
+import re
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -46,20 +46,7 @@ class CanadaSheltersScraper(BaseScraper):
         return scraped_update_date.date()
 
     def grab_data(self) -> pd.DataFrame:
-        df = pd.read_csv(self.data_url,
-                         usecols=self.extract_usecols,
-                         encoding='latin-1')
-        print(f'initial shape: {df.shape}')
-        df.drop_duplicates(
-            subset=self.drop_duplicates_columns,
-            ignore_index=True,
-            inplace=True
-        )
-        df.rename(columns=self.rename_columns, inplace=True)
-        print(df.head())
-        df = df[['name', 'city', 'state', 'serviceSummary']]
-        df['source'] = [self.source] * len(df)
-        df['service_summary'] = self.service_summary
+        df = super().grab_data()
         return df
 
 
@@ -88,10 +75,10 @@ CSS = CanadaSheltersScraper(
     dump_collection="tmpCanadaShelters",
     dupe_collection="tmpCanadaSheltersFoundDuplicates",
     data_source_collection_name="canada_shelters",
-    collection_dupe_field='ID'
+    collection_dupe_field='name'
 )
 
-'''if __name__ == "__main__":
+if __name__ == "__main__":
     scraped_update_date = CSS.scrape_updated_date()
     stored_update_date = CSS.retrieve_last_scraped_date()
     if stored_update_date is not False:
@@ -99,7 +86,5 @@ CSS = CanadaSheltersScraper(
             print('No new data. Goodbye...')
             sys.exit()
     cos_scraper.main_scraper(client)
-'''
 
-if __name__ == '__main__':
-    CSS.main_scraper(client)
+
