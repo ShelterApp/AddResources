@@ -65,7 +65,7 @@ hud_scraper = HUD_Scraper(
         'Organization Name', 'Project Name', 'address1', 'city', 'state', 'zip'
     ],
     rename_columns={
-        'Project Name': 'name', 'address1': 'address',
+        'Project Name': 'name',
         'Address2': 'address2', 'Phone': 'phone',
     },
     service_summary=[],

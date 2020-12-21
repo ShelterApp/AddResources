@@ -62,10 +62,10 @@ cos_scraper = COS_Scraper(
         'Address2', 'City', 'State', 'Zip Code'
     ],
     rename_columns={
-        "Name of Center": "name", "Address1": "address",
+        "Name of Center": "name", "Address1": "address1",
         "City": "city", "State": "state", "Zip Code": "zip",
-        "Address2": "address2", "Phone": "phone", 'Email Address': 'email',
-        "Office Hours": "hours", "Web Site URL": "url"
+        "Address2": "address2", "Phone": "phone", 'Email Address': 'contactEmail',
+        "Office Hours": "schedules", "Web Site URL": "website"
     },
     service_summary="Employment Assistance",
     check_collection="services",
