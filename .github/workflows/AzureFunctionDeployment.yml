@@ -4,12 +4,12 @@ name: Deploy Python project to Azure Function App
 on:
   push:
     branches:
-      - master
+      - provision_azure_function #temporary, change to master after
 
 env:
-  AZURE_FUNCTIONAPP_NAME: irs-pipeline2 # set this to your application's name
+  AZURE_FUNCTIONAPP_NAME: shelterapp-scrapers # set this to your application's name
   AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'   # set this to the path to your web app project, defaults to the repository root
-  PYTHON_VERSION: '3.7'                 # set this to the python version to use (supports 3.6, 3.7, 3.8)
+  PYTHON_VERSION: '3.8'                 # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
   build-and-deploy:
