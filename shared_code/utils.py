@@ -7,7 +7,8 @@ from tqdm import tqdm
 import re
 
 # Establish global variables
-
+os.environ['DBUSERNAME'] = 'democracylab'
+os.environ['PW'] = 'DemocracyLab2019'
 client = MongoClient(
     "mongodb+srv://" + os.environ['DBUSERNAME'] + ":" + os.environ['PW']
     + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
