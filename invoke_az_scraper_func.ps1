@@ -2,6 +2,13 @@
 param($scraperName)
 $ErrorActionPreference = "Stop"
 
+function ConsoleWriteline($arg = "") {
+    Write-Information $arg -InformationAction Continue
+}
+
+*************************************************
+# All functions go above this line.
+*************************************************
 if ($null -eq $scraperName -or $scraperName -eq "") {
     "Invalid name of the scraper specified. Invoke script with parameter `-scraperName <name>` . Allowed names are: " /
     + "IRS" /
@@ -28,5 +35,9 @@ if ($responseStatus -eq '202') {
 } 
 else {
     "Couldn't start the scraper. Status code: $responseStatus and Error: "
-    $azureResponse | ConvertTo-Json | String
+    $azureResponseJson = $azureResponse | ConvertTo-Json
+    ConsoleWriteline $azureResponseJson
+    return 1 #Failed.
 }
+
+return 0 #Success
