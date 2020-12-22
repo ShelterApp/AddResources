@@ -1,7 +1,7 @@
 import os
 import sys
-from datetime import datetime
 
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -15,11 +15,11 @@ if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
 del _i  # clean up global name space
-from shelterapputils.utils import (
+from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
     insert_services, client
 )
-from shelterapputils.base_scraper import BaseScraper
+from shared_code.base_scraper import BaseScraper
 
 
 class NWH_Scraper(BaseScraper):
@@ -27,13 +27,11 @@ class NWH_Scraper(BaseScraper):
         ak = os.environ.get('NWH_API_KEY')
         headers = {'Authorization': f'Bearer {ak}'}
         params = {'fields': self.extract_usecols}
-        print('grabbing the first 100')
         resp = requests.get(self.data_url, params=params, headers=headers).json()
         df = pd.DataFrame([r['fields'] for r in resp['records']])
         offset = resp['offset']
         while offset is not None:
             params['offset'] = offset
-            print(f'grabbing another 100. Offset: {offset}')
             next_output = requests.get(self.data_url, params=params, headers=headers).json()
             ndf = pd.DataFrame([r['fields'] for r in next_output['records']])
             df = df.append(ndf)
@@ -41,7 +39,6 @@ class NWH_Scraper(BaseScraper):
                 offset = next_output['offset']
             else:
                 offset = None
-        print(df.columns)
         df = super().grab_data(df=df)
         df['full address'].replace('', np.nan, inplace=True)
         df = df.dropna(subset=['full address']).reset_index(drop=True)

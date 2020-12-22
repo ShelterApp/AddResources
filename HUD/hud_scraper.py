@@ -1,7 +1,8 @@
 import os
 import sys
-from datetime import datetime
+import logging
 
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -14,12 +15,11 @@ if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
 del _i  # clean up global name space
-from shelterapputils.utils import (
+from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
     insert_services, client
 )
-from shelterapputils.base_scraper import BaseScraper
-from shelterapputils.scraper_utils import main_scraper
+from shared_code.base_scraper import BaseScraper
 
 
 class HUD_Scraper(BaseScraper):
@@ -57,7 +57,7 @@ hud_scraper = HUD_Scraper(
     data_format='XLS',
     extract_usecols=[
         'Row #', 'Project ID', 'Target Population',
-        'Project Name', 'Project Type',
+        'Organization Name', 'Project Name', 'Project Type',
         'Bed Type', 'Victim Service Provider', 'address1',
         'address2', 'city', 'state', 'zip', 'Total Beds', 'Updated On'
     ],
@@ -79,9 +79,9 @@ hud_scraper = HUD_Scraper(
 
 if __name__ == "__main__":
     scraped_update_date = hud_scraper.scrape_updated_date()
-    stored_update_date = hud_scraper.retrieve_last_scraped_date()
+    stored_update_date = hud_scraper.retrieve_last_scraped_date(client)
     if stored_update_date is not False:
         if scraped_update_date < stored_update_date:
-            print('No new data. Goodbye...')
+            logging.info('No new data. Goodbye...')
             sys.exit()
     hud_scraper.main_scraper(client)

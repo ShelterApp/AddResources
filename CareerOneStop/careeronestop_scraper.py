@@ -1,7 +1,8 @@
 import os
 import sys
-from datetime import datetime
+import logging
 
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -13,11 +14,11 @@ if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
 del _i  # clean up global name space
-from shelterapputils.utils import (
+from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
     insert_services, client
 )
-from shelterapputils.base_scraper import BaseScraper
+from shared_code.base_scraper import BaseScraper
 
 
 class COS_Scraper(BaseScraper):
@@ -37,7 +38,6 @@ class COS_Scraper(BaseScraper):
         scraped_update_date = datetime.strptime(
             month_string, '%B %Y'
         )
-        print(month_string)
         return scraped_update_date.date()
 
     def grab_data(self) -> pd.DataFrame:
@@ -78,9 +78,9 @@ cos_scraper = COS_Scraper(
 
 if __name__ == "__main__":
     scraped_update_date = cos_scraper.scrape_updated_date()
-    stored_update_date = cos_scraper.retrieve_last_scraped_date()
+    stored_update_date = cos_scraper.retrieve_last_scraped_date(client)
     if stored_update_date is not False:
         if scraped_update_date < stored_update_date:
-            print('No new data. Goodbye...')
+            logging.info('No new data. Goodbye...')
             sys.exit()
     cos_scraper.main_scraper(client)

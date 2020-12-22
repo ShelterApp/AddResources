@@ -1,7 +1,8 @@
 import os
 import sys
-from datetime import datetime
+import logging
 
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -9,24 +10,16 @@ import pandas as pd
 from pymongo import MongoClient, errors
 from tqdm import tqdm
 
-if __package__:  # if script is being run as a module
-    from ..shelterapputils.utils import (
-        check_similarity, locate_potential_duplicate,
-        insert_services, client
-    )
-    from ..shelterapputils.base_scraper import BaseScraper
-    from ..shelterapputils.scraper_utils import main_scraper
-else:  # if script is being run as a file
-    _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if _i not in sys.path:
-        # add parent directory to sys.path so utils module is accessible
-        sys.path.insert(0, _i)
-    del _i  # clean up global name space
-    from shelterapputils.utils import (
-        check_similarity, locate_potential_duplicate,
-        insert_services, client
-    )
-    from shelterapputils.base_scraper import BaseScraper
+_i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _i not in sys.path:
+    # add parent directory to sys.path so utils module is accessible
+    sys.path.insert(0, _i)
+del _i  # clean up global name space
+from shared_code.utils import (
+    check_similarity, locate_potential_duplicate,
+    insert_services, client
+)
+from shared_code.base_scraper import BaseScraper
 
 
 class CanadaSheltersScraper(BaseScraper):
@@ -42,16 +35,10 @@ class CanadaSheltersScraper(BaseScraper):
                     r.text
                 )
         date_string = date_string.group(0)
-        print(date_string)
         scraped_update_date = datetime.strptime(
             date_string, '%Y-%m-%d'
         )
-        print(scraped_update_date)
         return scraped_update_date.date()
-
-    def grab_data(self) -> pd.DataFrame:
-        df = super().grab_data()
-        return df
 
 
 CSS = CanadaSheltersScraper(
@@ -85,9 +72,9 @@ CSS = CanadaSheltersScraper(
 
 if __name__ == "__main__":
     scraped_update_date = CSS.scrape_updated_date()
-    stored_update_date = CSS.retrieve_last_scraped_date()
-    if stored_update_date is not False:
+    stored_update_date = CSS.retrieve_last_scraped_date(client)
+    if stored_update_date is not None:
         if scraped_update_date < stored_update_date:
-            print('No new data. Goodbye...')
+            logging.info('No new data. Goodbye...')
             sys.exit()
     CSS.main_scraper(client)

@@ -7,7 +7,7 @@ import mongomock
 from pymongo import MongoClient, TEXT
 
 from IRS import irs_scraper
-from shelterapputils.utils import (
+from shared_code.utils import (
     make_ngrams, distance, insert_services, check_similarity,
     locate_potential_duplicate, refresh_ngrams
 )

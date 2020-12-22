@@ -1,13 +1,15 @@
-from pymongo import MongoClient, TEXT
+import logging
+import os
 from collections import OrderedDict
+
+from pymongo import MongoClient, TEXT
 from tqdm import tqdm
 import re
-import os
 
 # Establish global variables
 
 client = MongoClient(
-    "mongodb+srv://" + os.environ.get('DBUSERNAME') + ":" + os.environ.get('PW')
+    "mongodb+srv://" + os.environ['DBUSERNAME'] + ":" + os.environ['PW']
     + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
 )['shelter']
 
@@ -123,6 +125,6 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     dupe_candidate = coll.find_one(
         {"$text": {"$search": ' '.join(grammed_name)}, 'zip': zipcode}
     )
-    if dupe_candidate is not False:
+    if dupe_candidate is not None:
         return dupe_candidate["name"]
     return False

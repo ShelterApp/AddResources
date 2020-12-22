@@ -13,11 +13,11 @@ if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
 del _i  # clean up global name space
-from shelterapputils.utils import (
+from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
     insert_services, client
 )
-from shelterapputils.base_scraper import BaseScraper
+from shared_code.base_scraper import BaseScraper
 
 
 class CFR_Scraper(BaseScraper):
@@ -25,11 +25,9 @@ class CFR_Scraper(BaseScraper):
         resp = super().scrape_updated_date()
         soup = BeautifulSoup(resp, 'html.parser')
         date_string = soup.find('span', class_='date')
-        print(date_string)
         scraped_update_date = datetime.strptime(
             date_string, '%B %d, %Y'
         )
-        print(date_string)
         return scraped_update_date.date()
 
     def grab_data(self) -> pd.DataFrame:

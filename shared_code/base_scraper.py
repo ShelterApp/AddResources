@@ -1,12 +1,13 @@
 from typing import List, Any
-from datetime import datetime
+import logging
 
+from datetime import datetime
 import requests
 import pandas as pd
 from pymongo import MongoClient, errors
 from tqdm import tqdm
 
-from shelterapputils.utils import (
+from shared_code.utils import (
     insert_services, locate_potential_duplicate,
     check_similarity, refresh_ngrams
 )
@@ -55,7 +56,7 @@ class BaseScraper:
                 str(stored_update_date), '%Y-%m-%d %H:%M:%S'
             ).date()
         except Exception as e:
-            print(e)
+            logging.info(e)
         if stored_update_date is not False:
             return stored_update_date
         return False
@@ -76,9 +77,9 @@ class BaseScraper:
             df = df
         else:
             df = pd.read_excel(self.data_url, usecols=self.extract_usecols)
-        print(f'initial shape: {df.shape}')
+        logging.info(f'initial shape: {df.shape}')
         df.drop_duplicates(
-            subset=list(self.drop_duplicates_columns),
+            subset=self.drop_duplicates_columns,
             inplace=True,
             ignore_index=True
         )
@@ -108,12 +109,12 @@ class BaseScraper:
         """
         found_duplicates = []
         coll = client[self.dump_collection]
-        for i in range(len(df)):
-            idx = int(df.loc[i, self.collection_dupe_field])
+        for i in tqdm(range(len(df))):
+            idx = df.loc[i, self.collection_dupe_field]
             dupe = coll.find_one(
                 {self.collection_dupe_field: idx}
             )
-            if dupe is not False:
+            if dupe is not None:
                 found_duplicates.append(i)
         duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
         insert_services(duplicate_df.to_dict('records'), client, self.dupe_collection)
@@ -129,16 +130,16 @@ class BaseScraper:
         """
         df = self.grab_data()
         if client[self.dump_collection].estimated_document_count() > 0:
-            print(f'purging duplicates from existing {self.source} collection')
-            df = self.purge_collection_duplicates(df)
+            logging.info(f'purging duplicates from existing {self.source} collection')
+            df = self.purge_collection_duplicates(df, client)
         if client[self.check_collection].estimated_document_count() == 0:
             # No need to check for duplicates in an empty collection
             insert_services(df.to_dict('records'), client, self.dump_collection)
         else:
-            print('refreshing ngrams')
+            logging.info('refreshing ngrams')
             refresh_ngrams(client, self.check_collection)
             found_duplicates = []
-            print('checking for duplicates in the services collection')
+            logging.info('checking for duplicates in the services collection')
             for i in tqdm(range(len(df))):
                 dc = locate_potential_duplicate(
                     df.loc[i, 'name'], df.loc[i, 'zip'], client, self.check_collection
@@ -148,15 +149,17 @@ class BaseScraper:
                         found_duplicates.append(i)
             duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
             if len(duplicate_df) > 0:
-                print(f'inserting services dupes into the {self.source} dupe collection')
+                logging.info(
+                    f'inserting services dupes into the {self.source} dupe collection'
+                )
                 insert_services(
                     duplicate_df.to_dict('records'), client, self.dupe_collection
                 )
             df = df.drop(found_duplicates).reset_index(drop=True)
-            print(f'final df shape: {df.shape}')
+            logging.info(f'final df shape: {df.shape}')
             if len(df) > 0:
                 insert_services(df.to_dict('records'), client, self.dump_collection)
-                print('updating scraped update date in data-sources collection')
+                logging.info('updating scraped update date in data-sources collection')
                 client['data_sources'].update_one(
                     {"name": self.data_source_collection_name},
                     {'$set': {'last_updated': datetime.strftime(datetime.now(), '%m/%d/%Y')}}
