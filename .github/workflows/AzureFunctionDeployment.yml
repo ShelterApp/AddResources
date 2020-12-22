@@ -32,6 +32,7 @@ jobs:
         popd
     - name: Test with pytest
       run: |
+        pip install pytest
         pytest
     - name: 'Run Azure Functions Action'
       uses: Azure/functions-action@v1.1.8
