@@ -8,11 +8,11 @@ import pytest
 import mongomock
 from pymongo import MongoClient, TEXT
 
-from shelterapputils.utils import (
+from shared_code.utils import (
     make_ngrams, distance, insert_services, check_similarity,
     locate_potential_duplicate, refresh_ngrams
 )
-from shelterapputils.base_scraper import BaseScraper
+from shared_code.base_scraper import BaseScraper
 
 
 @pytest.fixture

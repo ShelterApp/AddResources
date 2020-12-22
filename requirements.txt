@@ -5,6 +5,7 @@ certifi==2020.6.20
 chardet==3.0.4
 click==7.1.2
 colorama==0.4.4
+coverage==5.3.1
 decorator==4.4.2
 dnspython==2.0.0
 docutils==0.16
@@ -31,6 +32,7 @@ Pygments==2.7.2
 pymongo==3.11.0
 pyparsing==2.4.7
 pytest==6.1.1
+pytest-mock==3.4.0
 python-crfsuite==0.9.7
 python-dateutil==2.8.1
 pytz==2020.1

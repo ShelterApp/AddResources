@@ -8,23 +8,16 @@ import pandas as pd
 from pymongo import MongoClient, errors
 from tqdm import tqdm
 
-if __package__:  # if script is being run as a module
-    from ..shelterapputils.utils import (
-        check_similarity, locate_potential_duplicate,
-        insert_services, client
-    )
-    from ..shelterapputils.base_scraper import BaseScraper
-else:  # if script is being run as a file
-    _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if _i not in sys.path:
-        # add parent directory to sys.path so utils module is accessible
-        sys.path.insert(0, _i)
-    del _i  # clean up global name space
-    from shelterapputils.utils import (
-        check_similarity, locate_potential_duplicate,
-        insert_services, client
-    )
-    from shelterapputils.base_scraper import BaseScraper
+_i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _i not in sys.path:
+    # add parent directory to sys.path so utils module is accessible
+    sys.path.insert(0, _i)
+del _i  # clean up global name space
+from shared_code.utils import (
+    check_similarity, locate_potential_duplicate,
+    insert_services, client
+)
+from shared_code.base_scraper import BaseScraper
 
 
 class BHS_Scraper(BaseScraper):
@@ -39,7 +32,7 @@ class BHS_Scraper(BaseScraper):
         df = pd.read_csv(self.data_url, usecols=self.extract_usecols)
         df = df.dropna(subset=['zipCode', 'Location 1']).reset_index(drop=True)
         df.rename(columns=self.rename_columns, inplace=True)
-        df[['address', 'state']] = df.address.str.split('\n', expand=True)
+        df[['address1', 'state']] = df.address1.str.split('\n', expand=True)
         df[['state']] = df['state'].str[-2:]
         df[['zip']] = [str(int(x)) for x in df['zip']]
         return df
@@ -71,5 +64,3 @@ bhs_scraper = BHS_Scraper(
 
 if __name__ == '__main__':
     bhs_scraper.main_scraper(client)
-
-
