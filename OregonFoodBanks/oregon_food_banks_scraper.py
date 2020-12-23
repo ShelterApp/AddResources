@@ -41,6 +41,7 @@ class OFB_Scraper(BaseScraper):
                                   df['address1']
                                   )
         df['serviceSummary'] = self.service_summary
+        df['state'] = 'OR'
         df[['zip']] = [str(int(x)) for x in df['zip']]
         df[['registryID']] = [str(int(x)) for x in df['registryID']]
         df.drop(['address2'], axis=1, inplace=True)
