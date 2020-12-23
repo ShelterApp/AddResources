@@ -12,7 +12,23 @@ env:
   PYTHON_VERSION: '3.8'                 # set this to the python version to use (supports 3.6, 3.7, 3.8)
 
 jobs:
-  build-and-deploy:
+  build-n-test:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    - name: 'Resolve Project Dependencies Using Pip'
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout GitHub Action'
@@ -23,16 +39,6 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: 'Resolve Project Dependencies Using Pip'
-      shell: bash
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
-    - name: Test with pytest
-      run: |
-        pip install pytest
-        pytest
     - name: 'Run Azure Functions Action'
       uses: Azure/functions-action@v1.1.8
       id: fa
