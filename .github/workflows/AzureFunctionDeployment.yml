@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout GitHub Action'
-      uses: actions/checkout@provision_azure_function #temporary, change to master after
-
+      uses: actions/checkout@master 
+      
     - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
       uses: actions/setup-python@v1
       with:
