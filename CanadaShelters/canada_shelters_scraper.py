@@ -40,6 +40,9 @@ class CanadaSheltersScraper(BaseScraper):
         )
         return scraped_update_date.date()
 
+    def grab_data(self) -> pd.DataFrame:
+        df = super().grab_data()
+        return df
 
 CSS = CanadaSheltersScraper(
     source="CanadaShelterScraper",
