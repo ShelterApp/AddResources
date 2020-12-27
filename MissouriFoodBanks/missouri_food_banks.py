@@ -61,7 +61,7 @@ mfb_scraper = MFB_Scraper(
     check_collection="services",
     dump_collection="tmpMissouriFoodBanks",
     dupe_collection="tmpMissouriFoodBanksFoundDuplicates",
-    data_source_collection_name="missouri_food_banks",
+    data_source_collection_name="MissouriFoodBanks",
     collection_dupe_field='name'
 )
 
