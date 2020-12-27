@@ -23,8 +23,9 @@ del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, refresh_ngrams,
     make_ngrams, locate_potential_duplicate,
-    distance, insert_services, client
+    distance, insert_services, get_mongo_client
 )
+import urllib
 
 # set the DB user name and password in config
 with open('IRS/config.json', 'r') as con:
@@ -195,4 +196,6 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
 
 
 if __name__ == "__main__":
+
+    client = get_mongo_client(urllib.parse.quote(os.environ.get('DBUSERNAME')), urllib.parse.quote(os.environ.get('PW')))
     main(config, client, 'services', 'tmpIRS', 'tmpIRSFoundDuplicates')

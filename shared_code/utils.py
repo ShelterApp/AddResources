@@ -5,14 +5,21 @@ from collections import OrderedDict
 from pymongo import MongoClient, TEXT
 from tqdm import tqdm
 import re
+import urllib
 
 # Establish global variables
 
-client = MongoClient(
-    "mongodb+srv://" + os.environ['DBUSERNAME'] + ":" + os.environ['PW']
-    + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
-)['shelter']
+def get_mongo_client(conn_string): 
+    return MongoClient(conn_string)['shelter']
 
+def get_mongo_client(user, pw): 
+    return MongoClient("mongodb+srv://" + user + ":" + pw + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")['shelter']
+
+def get_mongo_client():
+    return MongoClient("mongodb+srv://" 
+        + urllib.parse.quote(os.environ["USERNAME"]) + ":" 
+        + urllib.parse.quote(os.environ["PW"]) 
+        + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")['shelter']
 
 def insert_services(data, client, collection):
     """Intake scraped services that have been processed and dupe-checked, and add to MongoDB.
