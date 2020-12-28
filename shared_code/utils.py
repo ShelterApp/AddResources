@@ -24,7 +24,8 @@ def insert_services(data, client, collection):
     """
     db = client
     db_coll = db[collection]
-    db_coll.insert_many(data)
+    if len(data) > 0:
+        db_coll.insert_many(data)
 
 
 def check_similarity(new_service, existing_service):
