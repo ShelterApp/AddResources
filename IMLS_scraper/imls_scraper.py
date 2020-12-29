@@ -15,8 +15,6 @@ from tqdm import tqdm
 import urllib 
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.environ["DBUSERNAME"] = "democracylab"
-os.environ["PW"] = "DemocracyLab2019"
 if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
