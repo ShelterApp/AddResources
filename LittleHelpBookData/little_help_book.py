@@ -39,7 +39,7 @@ class LHBScraper(BaseScraper):
         return scraped_update_date.date()
 
 
-    def grab_data(self):
+       def grab_data(self):
 
         '''Subcategory would be serviceSummary, Servicename would be name, PhoneNumber would be phone,
         Physical Address should be split into address1, city, state, zip, Hours of operation is schedule,
@@ -57,8 +57,11 @@ class LHBScraper(BaseScraper):
         df.replace('', np.nan, inplace=True)
         df.dropna(subset=['name'], inplace=True)
         df[['address1', 'state', 'zip']] = df['Physical Address'].str.extract(r'(.+)(OR).+(\d{5})', expand=True)
+        df['serviceSummary'] = np.where(df['serviceSummary'].isnull(), 
+                                        df['Category'], 
+                                        df['serviceSummary'])
         df['source'] = self.source
-        df.drop(['Physical Address'], axis=1, inplace=True)
+        df.drop(['Physical Address', 'Category'], axis=1, inplace=True)
         return df
 
 
