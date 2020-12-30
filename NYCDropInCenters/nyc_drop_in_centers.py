@@ -62,3 +62,5 @@ nyc_scraper = NYC_Scraper(
 if __name__ == '__main__':
     nyc_scraper.main_scraper(client)
 
+    
+    
