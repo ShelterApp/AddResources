@@ -128,7 +128,8 @@ https://github.com/ShelterApp/AddResources/wiki#scraping-guidelines--standards
 13. Miami Open 211 (Need to call through API)
      - http://miami.open.211.developer.adopta.agency/
 
-14. LittleHelpBook API
+14. LittleHelpBook API/Data Links from Open Eugene
+     - https://github.com/OpenEugene/little-help-book-data/blob/master/data/little-help-book.csv
      - https://github.com/OpenEugene/little-help-book-api
      - https://airtable.com/tblfr7CYabx9CwzO3/viwt6rHXp8T7o8DeJ
      - https://github.com/OpenEugene/little-help-book-web
