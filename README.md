@@ -97,8 +97,8 @@ https://github.com/ShelterApp/AddResources/wiki#scraping-guidelines--standards
      - https://airtable.com/shrkjUwUgqBU8vI1j/tblsz2z5rrnl9fdvG
 
 6. NYC Homeless Drop-In Centers, After School Programs: Runaway & Homeless Youth, :
-     - https://data.cityofnewyork.us/Social-Services/Directory-Of-Homeless-Drop-In-Centers/bmxf-3rd4
-     - https://data.cityofnewyork.us/Social-Services/DYCD-after-school-programs-Runaway-And-Homeless-Yo/ujsc-un6m
+~~     - https://data.cityofnewyork.us/Social-Services/Directory-Of-Homeless-Drop-In-Centers/bmxf-3rd4 ~~
+~~     - https://data.cityofnewyork.us/Social-Services/DYCD-after-school-programs-Runaway-And-Homeless-Yo/ujsc-un6m ~~
      
 7. Washington DC Homeless Services & Shelters
      - https://opendata.dc.gov/datasets/47be87a68e7a4376a3bdbe15d85de398_6
