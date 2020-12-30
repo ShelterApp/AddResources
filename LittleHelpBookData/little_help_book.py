@@ -21,7 +21,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class LHB_Scraper(BaseScraper):
+class LHBScraper(BaseScraper):
 
     def scrape_updated_date(self):
 
@@ -62,7 +62,7 @@ class LHB_Scraper(BaseScraper):
         return df
 
 
-lhb_scraper = LHB_Scraper(
+lhb_scraper = LHBScraper(
     source="LittleHelpBook",
     data_url='https://github.com/OpenEugene/little-help-book-data/raw/master/data/little-help-book.csv',
     data_page_url='https://github.com/OpenEugene/little-help-book-data/blob/master/data/little-help-book.csv',
@@ -82,9 +82,9 @@ lhb_scraper = LHB_Scraper(
     },
     service_summary="",
     check_collection="services",
-    dump_collection="tmpPittsburghServices",
-    dupe_collection="tmpPittsburghServicesFoundDuplicates",
-    data_source_collection_name="pittsburgh_services",
+    dump_collection="tmpLittleHelpBook",
+    dupe_collection="tmpLHBDuplicates",
+    data_source_collection_name="LittleHelpBook",
     collection_dupe_field='name'
 )
 
