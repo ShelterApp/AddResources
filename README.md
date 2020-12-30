@@ -2,7 +2,7 @@
 ``````
 Shelter App Inc., is an all volunteer non-profit organization whose mission is to help homeless and low-income families connect to services using web and mobile app.
 ``````
-#ShelterApp Architecture
+# ShelterApp Architecture
 
 We are trying to scrape data from different open data sets by removing duplicates and adding it into temp tables in MongoDB. These temp tables are populated in our Volunteer Portal where volunteers would manually validate the information before commiting it into our main collection in MongoDB from which our front end app pulls the data.
 ![architecture](https://github.com/ShelterApp/AddResources/blob/master/ShelterAppArchitecture.png)
