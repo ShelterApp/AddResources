@@ -96,3 +96,5 @@ if __name__ == "__main__":
             logging.info('No new data. Goodbye...')
             sys.exit()
     lhb_scraper.main_scraper(client)
+    
+    
