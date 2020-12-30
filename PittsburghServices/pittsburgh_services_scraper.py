@@ -52,7 +52,7 @@ class PS_Scraper(BaseScraper):
 
         '''Concatenating services for facilities with more than one'''
         df = df.groupby(df['address'], as_index=False).agg({'serviceSummary': '; '.join, 'name': 'first'})
-        df[['address1','state', 'zip']] = df['address'].str.extract(r'(.+)([A-Z]{2}).+(\d{5})', expand=True)
+        df[['address1', 'state', 'zip']] = df['address'].str.extract(r'(.+)([A-Z]{2}).+(\d{5})', expand=True)
         df['city'] = 'Pittsburgh'
         df.drop(['address'], axis=1, inplace=True)
         return df
