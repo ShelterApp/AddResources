@@ -10,7 +10,8 @@ import re
 
 client = MongoClient(
     "mongodb+srv://" + os.environ['DBUSERNAME'] + ":" + os.environ['PW']
-    + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
+#    + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
+    + "@cluster0.dlr3b.mongodb.net/Cluster0?retryWrites=true&w=majority"
 )['shelter']
 
 
