@@ -102,3 +102,5 @@ lhb_scraper = LHBScraper(
             logging.info('No new data. Goodbye...')
             sys.exit()'''
     lhb_scraper.main_scraper(client)
+    
+    
