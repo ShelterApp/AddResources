@@ -26,7 +26,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
      
-class IMLS_Scraper(BaseScraper):
+class Imls_Scraper(BaseScraper):
   
     def __init__(self,
                  source: str,
@@ -78,7 +78,7 @@ class IMLS_Scraper(BaseScraper):
         return self._latest_date
 
 
-imls_scraper = IMLS_Scraper(
+imls_scraper = Imls_Scraper(
     source="IMLS",
     data_url='https://placeholderurl',
     data_page_url='https://www.imls.gov/research-evaluation/data-collection/public-libraries-survey',
@@ -90,7 +90,7 @@ imls_scraper = IMLS_Scraper(
        'LIBNAME', 'ADDRESS', 'CITY', 'STABR', 'ZIP'
     ],
     rename_columns={
-        "STABR": "state", "LIBNAME": "name", "ZIP": "zip"
+        "STABR": "state", "LIBNAME": "name", "ZIP": "zip", "ADDRESS": "address1", "CITY": "city", "PHONE" : "phone"
     },
     service_summary="Computers, Internet, Books, Charging Stations, Restrooms",
     check_collection="services",
@@ -102,4 +102,10 @@ imls_scraper = IMLS_Scraper(
 
 
 if __name__ == "__main__":
+    scraped_update_date = imls_scraper.scrape_updated_date()
+    stored_update_date = imls_scraper.retrieve_last_scraped_date(client)
+    if stored_update_date is not False:
+        if scraped_update_date < stored_update_date:
+            logging.info('No new data. Goodbye...')
+            sys.exit()
     imls_scraper.main_scraper(client)
