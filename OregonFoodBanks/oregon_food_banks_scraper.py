@@ -21,7 +21,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class OFB_Scraper(BaseScraper):
+class OFBScraper(BaseScraper):
 
     ''' we need to pull only address, city, state, zip, name,
     serviceSummary we use food bank and registry as registryID'''
@@ -49,7 +49,7 @@ class OFB_Scraper(BaseScraper):
 
 
 
-ofb_scraper = OFB_Scraper(
+ofb_scraper = OFBScraper(
     source="OregonFoodBanks",
     data_url='https://data.oregon.gov/api/views/nvp3-5wtz/rows.csv?accessType=DOWNLOAD',
     data_page_url='https://data.oregon.gov/Business/Filtered-Businesses-Food-Banks/nvp3-5wtz',
@@ -68,7 +68,7 @@ ofb_scraper = OFB_Scraper(
     check_collection="services",
     dump_collection="tmpOregonFoodBanks",
     dupe_collection="tmpOregonFoodBanksFoundDuplicates",
-    data_source_collection_name="oregon_food_banks",
+    data_source_collection_name="OregonFoodBanks",
     collection_dupe_field='name',
 )
 

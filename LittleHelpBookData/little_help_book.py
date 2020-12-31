@@ -21,7 +21,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class LHB_Scraper(BaseScraper):
+class LHBScraper(BaseScraper):
 
     def scrape_updated_date(self):
 
@@ -57,19 +57,25 @@ class LHB_Scraper(BaseScraper):
         df.replace('', np.nan, inplace=True)
         df.dropna(subset=['name'], inplace=True)
         df[['address1', 'state', 'zip']] = df['Physical Address'].str.extract(r'(.+)(OR).+(\d{5})', expand=True)
+        df['serviceSummary'] = np.where(df['serviceSummary'].isnull(),
+                                        df['Category'],
+                                        df['serviceSummary'])
+        df.drop(['Physical Address', 'Category'], axis=1, inplace=True)
+        df = df.groupby(['name', 'phone'], as_index=False).agg({'serviceSummary': ', '.join, 'address1': 'first',
+                                                                  'zip': 'first', 'state': 'first', 'schedule': 'first',
+                                                                'description': 'first', 'website': 'first', 'contactEmail': 'first'})
         df['source'] = self.source
-        df.drop(['Physical Address'], axis=1, inplace=True)
         return df
 
 
-lhb_scraper = LHB_Scraper(
+lhb_scraper = LHBScraper(
     source="LittleHelpBook",
     data_url='https://github.com/OpenEugene/little-help-book-data/raw/master/data/little-help-book.csv',
     data_page_url='https://github.com/OpenEugene/little-help-book-data/blob/master/data/little-help-book.csv',
     data_format="CSV",
     extract_usecols=[
         "Subcategory", "Service Name", "Phone Number", 'Hours of operation',
-        'Physical Address', 'Description', 'Web address', 'Email Address'
+        'Physical Address', 'Description', 'Web address', 'Email Address', 'Category'
     ],
     drop_duplicates_columns=[
         "Subcategory", "Service Name", "Phone Number", 'Hours of operation',
@@ -82,17 +88,17 @@ lhb_scraper = LHB_Scraper(
     },
     service_summary="",
     check_collection="services",
-    dump_collection="tmpPittsburghServices",
-    dupe_collection="tmpPittsburghServicesFoundDuplicates",
-    data_source_collection_name="pittsburgh_services",
+    dump_collection="tmpLittleHelpBook",
+    dupe_collection="tmpLHBDuplicates",
+    data_source_collection_name="LittleHelpBook",
     collection_dupe_field='name'
 )
 
-if __name__ == "__main__":
+'''if __name__ == "__main__":
     scraped_update_date = lhb_scraper.scrape_updated_date()
     stored_update_date = lhb_scraper.retrieve_last_scraped_date(client)
     if stored_update_date is not None:
         if scraped_update_date < stored_update_date:
             logging.info('No new data. Goodbye...')
-            sys.exit()
+            sys.exit()'''
     lhb_scraper.main_scraper(client)

@@ -68,7 +68,7 @@ CSS = CanadaSheltersScraper(
     check_collection="services",
     dump_collection="tmpCanadaShelters",
     dupe_collection="tmpCanadaSheltersFoundDuplicates",
-    data_source_collection_name="canada_shelters",
+    data_source_collection_name="CanadaShelterScraper",
     collection_dupe_field='name',
     encoding='latin-1'
 )

@@ -21,7 +21,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class PS_Scraper(BaseScraper):
+class PSScraper(BaseScraper):
 
     def scrape_updated_date(data_page_url):
         resp = super().scrape_updated_date()
@@ -62,7 +62,7 @@ class PS_Scraper(BaseScraper):
 
 
 
-ps_scraper = PS_Scraper(
+ps_scraper = PSScraper(
     source="PittsburghServicesScraper",
     data_url = 'https://data.wprdc.org/datastore/dump/5a05b9ec-2fbf-43f2-bfff-1de2555ff7d4',
     data_page_url = 'https://catalog.data.gov/dataset/bigburgh-social-service-listings',
@@ -80,8 +80,8 @@ ps_scraper = PS_Scraper(
     service_summary="",
     check_collection="services",
     dump_collection="tmpPittsburghServices",
-    dupe_collection="tmpPittsburghServicesFoundDuplicates",
-    data_source_collection_name="pittsburgh_services",
+    dupe_collection="tmpPittsburghServicesDuplicates",
+    data_source_collection_name="PittsburghServicesScraper",
     collection_dupe_field='name'
     )
 

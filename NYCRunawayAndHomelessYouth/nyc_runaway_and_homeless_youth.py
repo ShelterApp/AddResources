@@ -21,18 +21,26 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class NYC_Youth_Scraper(BaseScraper):
+class NYCYouthScraper(BaseScraper):
 
 
     def grab_data(self) -> pd.DataFrame:
 
         df = super().grab_data()
-        df['state'], df['city'] = 'NY', 'New York'
+        df['state'], df['city'] = 'NY', 'New York City'
         df['phone'] = df['phone'].str.replace(r'(\d{3})[.](\d{3})[.](\d{4})', r'(\1) \2-\3')
+        df = df.applymap(str)
+        df = df.groupby(['address1', 'zip'], as_index=False).agg({'serviceSummary': ', '.join, 'name': 'first',
+                                                          'phone': 'first'})
+        if 'zip' in list(df.columns):
+            df['zip'] = df['zip'].astype("str")
+            df['zip'] = df['zip'].apply(
+                lambda z: z[0:5] if "-" in z else z
+            )
         return df
 
 
-nyc_youth_scraper = NYC_Youth_Scraper(
+nyc_youth_scraper = NYCYouthScraper(
     source = "NYCRunawayAndHomelessYouth",
     data_url = 'https://data.cityofnewyork.us/api/views/ujsc-un6m/rows.csv?accessType=DOWNLOAD',
     data_page_url = 'https://data.cityofnewyork.us/Social-Services/DYCD-after-school-programs-Runaway-And-Homeless-Yo/ujsc-un6m',
@@ -42,7 +50,7 @@ nyc_youth_scraper = NYC_Youth_Scraper(
         'Number and Street Address', 'Postcode'
                       ],
     drop_duplicates_columns = [
-                                  "PROGRAM", "SITE NAME", "Contact Number",
+                                "SITE NAME", "Contact Number",
         'Number and Street Address', 'Postcode'
                               ],
     rename_columns = {
@@ -52,8 +60,8 @@ nyc_youth_scraper = NYC_Youth_Scraper(
     service_summary = [''],
     check_collection = "services",
     dump_collection = "tmpNYCRunawayAndHomelessYouth",
-    dupe_collection = "tmpNYCRunawayAndHomelessYouthFoundDuplicates",
-    data_source_collection_name = "nyc_runaway_and_homeless_youth",
+    dupe_collection = "tmpNYCRAHYFoundDuplicates",
+    data_source_collection_name = "NYCRunawayAndHomelessYouth",
     collection_dupe_field = 'name'
     )
 

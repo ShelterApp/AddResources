@@ -21,7 +21,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class NYC_Scraper(BaseScraper):
+class NYCScraper(BaseScraper):
 
     def grab_data(self):
 
@@ -33,11 +33,11 @@ class NYC_Scraper(BaseScraper):
         df.rename(columns=self.rename_columns, inplace=True)
         df[['address1']] = df['address1'].str.replace('\n', ' ')
         df[['address1']] = df['address1'].str.extract('(.+)(?=NY)')
-        df['state'], df['city'], df['serviceSummary'], df['source'] = 'NY', 'New York', self.service_summary, self.source
+        df['state'], df['city'], df['serviceSummary'], df['source'] = 'NY', 'New York City', self.service_summary, self.source
         return df
 
 
-nyc_scraper = NYC_Scraper(
+nyc_scraper = NYCScraper(
     source = "NYCDropInCenters",
     data_url = 'https://data.cityofnewyork.us/api/views/bmxf-3rd4/rows.csv?accessType=DOWNLOAD',
     data_page_url = 'https://data.cityofnewyork.us/Social-Services/Directory-Of-Homeless-Drop-In-Centers/bmxf-3rd4',
@@ -55,7 +55,7 @@ nyc_scraper = NYC_Scraper(
     check_collection = "services",
     dump_collection = "tmpNYCDropInCenters",
     dupe_collection = "tmpNYCDropInCentersFoundDuplicates",
-    data_source_collection_name = "nyc_drop_in_centers",
+    data_source_collection_name = "NYCDropInCenters",
     collection_dupe_field = 'name'
     )
 
