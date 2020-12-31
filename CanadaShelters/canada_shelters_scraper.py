@@ -81,3 +81,5 @@ if __name__ == "__main__":
             logging.info('No new data. Goodbye...')
             sys.exit()
     CSS.main_scraper(client)
+
+    
