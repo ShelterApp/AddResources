@@ -20,11 +20,11 @@ from shared_code.utils import (
 )
 from shared_code.base_scraper import BaseScraper
 
-class MFB_Scraper(BaseScraper):
+class DCSheltersScraper(BaseScraper):
 
-    '''For this dataset we need to scrape following columns: FACILITY_NAME(name), PROVIDER(provider), CITY(city),
-    ZIP(zip), WARD(ward), TYPE(type), SUBTYPE(subtype), URL(url), ON_SITE_MEDICAL_CLINIC(medical_clinic),
-    AGES_SERVED(ages_served), HOW_TO_ACCESS(how_to_access),
+    '''For this dataset we need to scrape following columns: FACILITY_NAME(name), CITY(city), ZIP(zip),
+    SUBTYPE(bed_type), URL(url), ON_SITE_MEDICAL_CLINIC(medical_clinic), AGES_SERVED(ages_served),
+    HOW_TO_ACCESS(how_to_access),
     and add an extra serviceSummary column and default it to "Emergency Shelter" for all entries,
     and add an extra state column and default it to "DC" for all entries.'''
 
@@ -32,28 +32,30 @@ class MFB_Scraper(BaseScraper):
         df = pd.read_csv(self.data_url, usecols=self.extract_usecols)
         df.rename(columns=self.rename_columns, inplace=True)
         df['medical_clinic'] = np.where(~df['medical_clinic'].isnull(), df['medical_clinic'], 'No')
+        df['bed_type'] = df['bed_type'].replace('Men', 'Male')
+        df['bed_type'] = df['bed_type'].replace('Women', 'Female')
+        df['bed_type'] = df['bed_type'].replace('Men & Women', 'Male & Female')
         df['serviceSummary'] = self.service_summary
         df['state'] = 'DC'
         return df
 
 
-mfb_scraper = MFB_Scraper(
-    source="WashingtonDCServices",
+dc_shelters_scraper = DCSheltersScraper(
+    source="WashingtonDCShelters",
     data_url='https://opendata.arcgis.com/datasets/87c5e68942304363a4578b30853f385d_25.csv',
     data_page_url='https://opendata.dc.gov/datasets/87c5e68942304363a4578b30853f385d_25/data',
     data_format="CSV",
     extract_usecols=[
-        "FACILITY_NAME", "PROVIDER", "ADDRESS", "CITY", "ZIP", "WARD", "TYPE", "SUBTYPE", "URL",
+        "FACILITY_NAME", "ADDRESS", "CITY", "ZIP", "SUBTYPE", "URL",
         "ON_SITE_MEDICAL_CLINIC", "AGES_SERVED", "HOW_TO_ACCESS"
     ],
     drop_duplicates_columns=[
-        "FACILITY_NAME", "PROVIDER", "ADDRESS", "CITY", "ZIP", "WARD", "TYPE", "SUBTYPE", "URL",
-        "ON_SITE_MEDICAL_CLINIC", "AGES_SERVED", "HOW_TO_ACCESS"
+        "FACILITY_NAME", "ADDRESS", "CITY", "ZIP"
     ],
     rename_columns={
-        "FACILITY_NAME": "name", "PROVIDER": "provider", 'ADDRESS': 'address1', "CITY": 'city', 'ZIP': 'zip',
-        "WARD": "ward", "TYPE": "service_type", "SUBTYPE": "people_served", 'URL': 'website',
-        "ON_SITE_MEDICAL_CLINIC": "medical_clinic", "AGES_SERVED": "ages_served", "HOW_TO_ACCESS": "how_to_access"
+        "FACILITY_NAME": "name", 'ADDRESS': 'address1', "CITY": 'city', 'ZIP': 'zip', "SUBTYPE": "bed_type",
+        'URL': 'website', "ON_SITE_MEDICAL_CLINIC": "medical_clinic", "AGES_SERVED": "ages_served",
+        "HOW_TO_ACCESS": "how_to_access"
     },
     service_summary="Emergency Shelter",
     check_collection="services",
@@ -65,5 +67,5 @@ mfb_scraper = MFB_Scraper(
 
 
 if __name__ == '__main__':
-    mfb_scraper.main_scraper(client)
+    dc_shelters_scraper.main_scraper(client)
 

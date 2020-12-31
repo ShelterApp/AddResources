@@ -20,7 +20,7 @@ from shared_code.utils import (
 )
 from shared_code.base_scraper import BaseScraper
 
-class MFB_Scraper(BaseScraper):
+class BCFoodBanksScraper(BaseScraper):
 
     '''For this dataset we need to scrape following columns: FCLTY_NM(name),
     ST_ADDRESS(address1), LOCALITY(city), POSTAL_CD(zip), CONT_PHONE(phone),
@@ -45,7 +45,7 @@ class MFB_Scraper(BaseScraper):
         return df
 
 
-mfb_scraper = MFB_Scraper(
+bc_food_banks_scraper = BCFoodBanksScraper(
     source="BCFoodBanks",
     data_url='https://drive.google.com/file/d/1a5GEFXqmlKWM01FenakScIMknU1PMICq/view?usp=sharing',
     data_page_url='https://catalogue.data.gov.bc.ca/dataset/food-banks', #need to change the URL
@@ -70,7 +70,7 @@ mfb_scraper = MFB_Scraper(
 
 
 if __name__ == '__main__':
-    mfb_scraper.main_scraper(client)
+    bc_food_banks_scraper.main_scraper(client)
 
 
 
