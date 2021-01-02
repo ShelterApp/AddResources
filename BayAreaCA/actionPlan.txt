@@ -4,5 +4,5 @@ Code needs to:
 3. Find the diff.
 4. clean up and organize
 5. Push to DB.
-6. Verify data in production
-7. Verify data correctness 
+6. Verify data is correct
+7 Verify data made it to production.
