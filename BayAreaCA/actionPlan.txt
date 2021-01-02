@@ -1,0 +1,8 @@
+Code needs to:
+1. Get weekly updates which are done by https://biglocalnews.org Stanford volunteers
+2. Login and download file.
+3. Find the diff.
+4. clean up and organize
+5. Push to DB.
+6. Verify data in production
+7. Verify data correctness 
