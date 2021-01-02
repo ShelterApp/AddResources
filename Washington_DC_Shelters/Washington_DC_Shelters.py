@@ -46,14 +46,14 @@ dc_shelters_scraper = DCSheltersScraper(
     data_page_url='https://opendata.dc.gov/datasets/87c5e68942304363a4578b30853f385d_25/data',
     data_format="CSV",
     extract_usecols=[
-        "FACILITY_NAME", "ADDRESS", "CITY", "ZIP", "SUBTYPE", "URL",
+        "FACILITY_NAME", "ADDRESS", "CITY", "SUBTYPE", "URL", "ZIP",
         "ON_SITE_MEDICAL_CLINIC", "AGES_SERVED", "HOW_TO_ACCESS"
     ],
     drop_duplicates_columns=[
         "FACILITY_NAME", "ADDRESS", "CITY", "ZIP"
     ],
     rename_columns={
-        "FACILITY_NAME": "name", 'ADDRESS': 'address1', "CITY": 'city', 'ZIP': 'zip', "SUBTYPE": "bed_type",
+        "FACILITY_NAME": "name", 'ADDRESS': 'address1', "CITY": 'city', "SUBTYPE": "bed_type", 'ZIP': 'zip',
         'URL': 'website', "ON_SITE_MEDICAL_CLINIC": "medical_clinic", "AGES_SERVED": "ages_served",
         "HOW_TO_ACCESS": "how_to_access"
     },
