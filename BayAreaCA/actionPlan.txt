@@ -4,9 +4,12 @@ Code needs to:
   Updates require an API token with 'biglocalnews' account
   account will be: S.A.
   Secret will be kept seperately.
-2. Login and download file.
-3. Find the diff.
-4. clean up and organize
-5. Push to DB.
-6. Verify data is correct
-7 Verify data made it to production.
+
+ 
+  2. Weekly data gets downloaded into temp DB
+
+  4. clean up and organize tempDB download into the 14 key names needed for tmpCollections so it matches with 
+      services collections
+
+  5. let others know the data is ready to be confirmed, then pushed to mainDB.
+
