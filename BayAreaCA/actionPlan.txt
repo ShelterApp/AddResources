@@ -1,5 +1,9 @@
 Code needs to:
 1. Get weekly updates which are done by https://biglocalnews.org Stanford volunteers
+  Done Automatically via an Azure function with it's own code
+  Updates require an API token with 'biglocalnews' account
+  account will be: S.A.
+  Secret will be kept seperately.
 2. Login and download file.
 3. Find the diff.
 4. clean up and organize
