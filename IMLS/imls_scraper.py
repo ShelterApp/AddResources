@@ -13,8 +13,11 @@ import re
 from pymongo import MongoClient, errors
 from tqdm import tqdm
 import urllib 
+import numpy as np
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.environ["DBUSERNAME"] = "democracylab"
+os.environ["PW"] = "DemocracyLab2019"
 if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
@@ -71,6 +74,7 @@ class Imls_Scraper(BaseScraper):
                 usecols=self.extract_usecols,
                 encoding = "ISO-8859-1")
                 df = super().grab_data(df=df)
+                df['notes'] = np.where((df['STATSTRU'] == '03') | (df['STATSTRU'] == '23'), 'Closed or Temporarily Closed library.', '')
                 return df
 
     @property
@@ -84,7 +88,7 @@ imls_scraper = Imls_Scraper(
     data_page_url='https://www.imls.gov/research-evaluation/data-collection/public-libraries-survey',
     data_format="DF",
     extract_usecols=[
-       'LIBID', 'LIBNAME', 'ADDRESS', 'CITY', 'STABR', 'ZIP', 'PHONE'
+       'LIBID', 'LIBNAME', 'ADDRESS', 'CITY', 'STABR', 'ZIP', 'PHONE', 'STATSTRU'
     ],
     drop_duplicates_columns=[
        'LIBNAME', 'ADDRESS', 'CITY', 'STABR', 'ZIP'
@@ -101,11 +105,5 @@ imls_scraper = Imls_Scraper(
 )
 
 
-if __name__ == "__main__":
-    scraped_update_date = imls_scraper.scrape_updated_date()
-    stored_update_date = imls_scraper.retrieve_last_scraped_date(client)
-    if stored_update_date is not False:
-        if scraped_update_date < stored_update_date:
-            logging.info('No new data. Goodbye...')
-            sys.exit()
+if __name__ == "__main__": 
     imls_scraper.main_scraper(client)
