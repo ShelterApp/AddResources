@@ -8,6 +8,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from pymongo import MongoClient, errors
 from tqdm import tqdm
+import logging
+
+logger = logging.getLogger(__name__)
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
@@ -21,7 +24,6 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 class DCSheltersScraper(BaseScraper):
-
     '''For this dataset we need to scrape following columns: FACILITY_NAME(name), CITY(city), ZIP(zip),
     SUBTYPE(bed_type), URL(url), ON_SITE_MEDICAL_CLINIC(medical_clinic), AGES_SERVED(ages_served),
     HOW_TO_ACCESS(how_to_access),
@@ -39,9 +41,20 @@ class DCSheltersScraper(BaseScraper):
         df['state'] = 'DC'
         return df
 
+    def scrape_updated_date(self):
+        resp = super().scrape_updated_date()
+        soup = BeautifulSoup(resp, 'html.parser')
+        metatag_span = soup.find('span', {'class': 'metatag-updated'})
+        if metatag_span:
+            scraped_update_date = datetime.strptime(metatag_span.text, '%m\%d/%Y')
+            return scraped_update_date.date()
+        else: 
+            return datetime.strptime('1970-01-01', '%Y-%m-%d').date()
+
+data_source_name = 'washington_dc_shelters'
 
 dc_shelters_scraper = DCSheltersScraper(
-    source="WashingtonDCShelters",
+    source = data_source_name,
     data_url='https://opendata.arcgis.com/datasets/87c5e68942304363a4578b30853f385d_25.csv',
     data_page_url='https://opendata.dc.gov/datasets/87c5e68942304363a4578b30853f385d_25/data',
     data_format="CSV",
@@ -60,9 +73,9 @@ dc_shelters_scraper = DCSheltersScraper(
     service_summary="Emergency Shelter",
     check_collection="services",
     dump_collection="tmpWashingtonDCShelters",
-    dupe_collection="tmpWashingtonDCSheltersFoundDuplicates",
-    data_source_collection_name="Washington_DC_Shelters",
-    collection_dupe_field='name'
+    dupe_collection="tmpWashingtonDCSheltersDuplicates",
+    data_source_collection_name=data_source_name,
+    collection_dupe_field='name',
 )
 
 

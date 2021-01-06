@@ -8,6 +8,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from pymongo import MongoClient, errors
 from tqdm import tqdm
+import logging
+
+logger = logging.getLogger(__name__)
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
@@ -34,7 +37,7 @@ class BCFoodBanksScraper(BaseScraper):
         df['phone'] = df['phone'].str.replace(r'(\d{3})[-](\d{3}[-]\d{4})', r'(\1) \2')
         df['address1'] = np.where(~df['address1'].isnull(),
                                   df['address1'],
-                                  ''
+                                  df['MAIL_ADD'] #we want to use MAIL_ADD when ST_ADDRESS column is null, drop the column after
                                   )
         df['website'] = np.where(~df['website'].isnull(),
                                   df['website'],
@@ -42,16 +45,42 @@ class BCFoodBanksScraper(BaseScraper):
                                   )
         df['serviceSummary'] = self.service_summary
         df['state'] = 'BC'
+        #dropping the column because we used it's value for address1 when ST_ADDRESS was null.
+        df.drop(columns=['MAIL_ADD'], inplace=True)
         return df
 
+    def scrape_updated_date(self) -> str:
+        resp = super().scrape_updated_date()
+        soup = BeautifulSoup(resp, 'html.parser')
+        table_rows = soup.find_all('tr')
+        found = False
+        for r in table_rows:
+            for i, d in enumerate(r.find_all('td')):
+                if i == 0: 
+                    if d.text.strip() == 'Record Last Modified':
+                        found = True
+                if i == 1 and found:
+                    data_source_modified_on = d.text.strip()
+                    break
+            if found:
+                break
+        if found:
+            scraped_update_date = datetime.strptime(data_source_modified_on, '%Y-%m-%d')
+            return scraped_update_date.date()
+        else: 
+            return datetime.strptime('1970-01-01T00:00:00Z', '%Y-%m-%dT%H:%M:%SZ').date()
+
+data_source_name = 'bc_food_banks'
 
 bc_food_banks_scraper = BCFoodBanksScraper(
-    source="BCFoodBanks",
+    source=data_source_name,
+    #todo: Change this data_url from a single file to lastest file in corresonding google drive folder.
+    #because there is not an easy way to download this data programmatically.
     data_url='https://drive.google.com/file/d/1a5GEFXqmlKWM01FenakScIMknU1PMICq/view?usp=sharing',
     data_page_url='https://catalogue.data.gov.bc.ca/dataset/food-banks', #need to change the URL
     data_format="CSV",
     extract_usecols=[
-        "FCLTY_NM", "CONT_PHONE", "ST_ADDRESS", "LOCALITY", "POSTAL_CD", "WEBSITE"
+        "FCLTY_NM", "CONT_PHONE", "ST_ADDRESS", "MAIL_ADD", "LOCALITY", "POSTAL_CD", "WEBSITE"
     ],
     drop_duplicates_columns=[
         "FCLTY_NM", "CONT_PHONE", "LOCALITY", "POSTAL_CD"
@@ -63,11 +92,10 @@ bc_food_banks_scraper = BCFoodBanksScraper(
     service_summary="Food Bank",
     check_collection="services",
     dump_collection="tmpBCFoodBanks",
-    dupe_collection="tmpBCFoodBanksFoundDuplicates",
-    data_source_collection_name="BC_Food_Banks",
+    dupe_collection="tmpBCFoodBanksDuplicates",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )
-
 
 if __name__ == '__main__':
     bc_food_banks_scraper.main_scraper(client)

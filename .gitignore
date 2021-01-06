@@ -135,4 +135,5 @@ dmypy.json
 Mid-Atlantic and Great Lakes Areas.csv
 
 #VSCode stuff
-.vscode/
+
+.python_packages
