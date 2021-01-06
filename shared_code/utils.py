@@ -5,6 +5,7 @@ from collections import OrderedDict
 from pymongo import MongoClient, TEXT
 from tqdm import tqdm
 import re
+import numpy as np
 
 # Establish global variables
 
@@ -24,7 +25,8 @@ def insert_services(data, client, collection):
     """
     db = client
     db_coll = db[collection]
-    db_coll.insert_many(data)
+    if len(data) > 0:
+        db_coll.insert_many(data)
 
 
 def check_similarity(new_service, existing_service):
@@ -120,6 +122,10 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     Returns:
         str: name of the service that might be a duplicate
     """
+
+    if isinstance(zipcode, np.integer):
+        zipcode = int(zipcode)
+
     grammed_name = make_ngrams(name)
     coll = client[collection]
     dupe_candidate = coll.find_one(

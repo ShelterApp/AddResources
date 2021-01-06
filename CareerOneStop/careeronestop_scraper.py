@@ -33,8 +33,10 @@ class COS_Scraper(BaseScraper):
                     if d.text.strip() == 'Comprehensive and Affiliate American Job Centers':
                         found = True
                 if i == 1 and found is True:
-                    month_string = d.text
-                    found = False
+                    month_string = d.text                    
+                    break
+            if found:
+                break
         scraped_update_date = datetime.strptime(
             month_string, '%B %Y'
         )
@@ -75,12 +77,7 @@ cos_scraper = COS_Scraper(
     collection_dupe_field='ID'
 )
 
-
 if __name__ == "__main__":
-    scraped_update_date = cos_scraper.scrape_updated_date()
-    stored_update_date = cos_scraper.retrieve_last_scraped_date(client)
-    if stored_update_date is not False:
-        if scraped_update_date < stored_update_date:
-            logging.info('No new data. Goodbye...')
-            sys.exit()
-    cos_scraper.main_scraper(client)
+    if cos_scraper.is_new_data_available(client):
+        cos_scraper.main_scraper(client)
+        
