@@ -16,8 +16,7 @@ import urllib
 import numpy as np
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-os.environ["DBUSERNAME"] = "democracylab"
-os.environ["PW"] = "DemocracyLab2019"
+
 if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
     sys.path.insert(0, _i)
@@ -29,7 +28,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
      
-class Imls_Scraper(BaseScraper):
+class ImlsScraper(BaseScraper):
   
     def __init__(self,
                  source: str,
@@ -75,6 +74,7 @@ class Imls_Scraper(BaseScraper):
                 encoding = "ISO-8859-1")
                 df = super().grab_data(df=df)
                 df['notes'] = np.where((df['STATSTRU'] == '03') | (df['STATSTRU'] == '23'), 'Closed or Temporarily Closed library.', '')
+                df = df.drop(['STATSTRU']).reset_index(drop=True)
                 return df
 
     @property
@@ -82,7 +82,7 @@ class Imls_Scraper(BaseScraper):
         return self._latest_date
 
 
-imls_scraper = Imls_Scraper(
+imls_scraper = ImlsScraper(
     source="IMLS",
     data_url='https://placeholderurl',
     data_page_url='https://www.imls.gov/research-evaluation/data-collection/public-libraries-survey',
