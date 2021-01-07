@@ -134,8 +134,8 @@ dmypy.json
 # Local CSV
 Mid-Atlantic and Great Lakes Areas.csv
 
+.python_packages
+
 #VSCode stuff
 .vscode/
 /.vs
-
-.python_packages
