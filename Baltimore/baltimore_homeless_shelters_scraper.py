@@ -38,8 +38,10 @@ class BHSScraper(BaseScraper):
         return df
 
 
+data_source_name = "baltimore_homeless_shelters"
+
 bhs_scraper = BHSScraper(
-    source="BaltimoreHomelessShelters",
+    source=data_source_name,
     data_url="https://data.baltimorecity.gov/api/views/hyq3-8sxr/rows.csv?accessType=DOWNLOAD",
     data_page_url='https://data.baltimorecity.gov/Health/Homeless-Shelters/hyq3-8sxr',
     data_format="CSV",
@@ -57,7 +59,7 @@ bhs_scraper = BHSScraper(
     check_collection="services",
     dump_collection="tmpBaltimoreHomelessShelters",
     dupe_collection="tmpBHSFoundDuplicates",
-    data_source_collection_name="BaltimoreHomelessShelters",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )
 

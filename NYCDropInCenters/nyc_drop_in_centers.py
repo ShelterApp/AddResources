@@ -36,9 +36,10 @@ class NYCScraper(BaseScraper):
         df['state'], df['city'], df['serviceSummary'], df['source'] = 'NY', 'New York City', self.service_summary, self.source
         return df
 
+data_source_name = "NYC_drop_in_centers"
 
 nyc_scraper = NYCScraper(
-    source = "NYCDropInCenters",
+    source = data_source_name,
     data_url = 'https://data.cityofnewyork.us/api/views/bmxf-3rd4/rows.csv?accessType=DOWNLOAD',
     data_page_url = 'https://data.cityofnewyork.us/Social-Services/Directory-Of-Homeless-Drop-In-Centers/bmxf-3rd4',
     data_format = "CSV",
@@ -54,8 +55,8 @@ nyc_scraper = NYCScraper(
     service_summary = "Drop in centers",
     check_collection = "services",
     dump_collection = "tmpNYCDropInCenters",
-    dupe_collection = "tmpNYCDropInCentersFoundDuplicates",
-    data_source_collection_name = "NYCDropInCenters",
+    dupe_collection = "tmpNYCDropInCentersDuplicates",
+    data_source_collection_name = data_source_name,
     collection_dupe_field = 'name'
     )
 

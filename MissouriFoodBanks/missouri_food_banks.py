@@ -41,9 +41,10 @@ class MFBScraper(BaseScraper):
         df.drop(['lat', 'space', 'Additional Address Info.'], axis=1, inplace=True)
         return df
 
+data_source_name = "missouri_food_banks"
 
 mfb_scraper = MFBScraper(
-    source="MissouriFoodBanks",
+    source=data_source_name,
     data_url='https://data.mo.gov/api/views/eb3y-vtsa/rows.csv?accessType=DOWNLOAD',
     data_page_url='https://data.mo.gov/Social-Services/Food-Pantry-List/eb3y-vtsa',
     data_format="CSV",
@@ -61,7 +62,7 @@ mfb_scraper = MFBScraper(
     check_collection="services",
     dump_collection="tmpMissouriFoodBanks",
     dupe_collection="tmpMissouriFoodBanksFoundDuplicates",
-    data_source_collection_name="MissouriFoodBanks",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )
 

@@ -51,7 +51,7 @@ class PSScraper(BaseScraper):
         }, inplace=True)
 
         '''Concatenating services for facilities with more than one'''
-        df = df.groupby(df['address'], as_index=False).agg({'serviceSummary': '; '.join, 'name': 'first'})
+        df = self.aggregate_service_summary(df)
         df[['address1', 'state', 'zip']] = df['address'].str.extract(r'(.+)([A-Z]{2}).+(\d{5})', expand=True)
         df['city'] = 'Pittsburgh'
         df.drop(['address'], axis=1, inplace=True)
@@ -60,10 +60,10 @@ class PSScraper(BaseScraper):
 
 
 
-
+data_source_name = 'pittsburgh_services'
 
 ps_scraper = PSScraper(
-    source="PittsburghServicesScraper",
+    source=data_source_name,
     data_url = 'https://data.wprdc.org/datastore/dump/5a05b9ec-2fbf-43f2-bfff-1de2555ff7d4',
     data_page_url = 'https://catalog.data.gov/dataset/bigburgh-social-service-listings',
     data_format = "CSV",
@@ -81,18 +81,13 @@ ps_scraper = PSScraper(
     check_collection="services",
     dump_collection="tmpPittsburghServices",
     dupe_collection="tmpPittsburghServicesDuplicates",
-    data_source_collection_name="PittsburghServicesScraper",
-    collection_dupe_field='name'
+    data_source_collection_name=data_source_name,
+    collection_dupe_field='name',
+    groupby_columns=['address']
     )
 
 
 
 
 if __name__ == "__main__":
-    scraped_update_date = ps_scraper.scrape_updated_date()
-    stored_update_date = ps_scraper.retrieve_last_scraped_date(client)
-    if stored_update_date is not None:
-        if scraped_update_date < stored_update_date:
-            logging.info('No new data. Goodbye...')
-            sys.exit()
     ps_scraper.main_scraper(client)

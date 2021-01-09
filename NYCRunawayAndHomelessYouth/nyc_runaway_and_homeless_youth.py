@@ -30,8 +30,7 @@ class NYCYouthScraper(BaseScraper):
         df['state'], df['city'] = 'NY', 'New York City'
         df['phone'] = df['phone'].str.replace(r'(\d{3})[.](\d{3})[.](\d{4})', r'(\1) \2-\3')
         df = df.applymap(str)
-        df = df.groupby(['address1', 'zip'], as_index=False).agg({'serviceSummary': ', '.join, 'name': 'first',
-                                                          'phone': 'first'})
+        df = self.aggregate_service_summary(df)
         if 'zip' in list(df.columns):
             df['zip'] = df['zip'].astype("str")
             df['zip'] = df['zip'].apply(
@@ -39,9 +38,10 @@ class NYCYouthScraper(BaseScraper):
             )
         return df
 
+data_source_name = "NYC_runaway_homeless_youth"
 
 nyc_youth_scraper = NYCYouthScraper(
-    source = "NYCRunawayAndHomelessYouth",
+    source = data_source_name,
     data_url = 'https://data.cityofnewyork.us/api/views/ujsc-un6m/rows.csv?accessType=DOWNLOAD',
     data_page_url = 'https://data.cityofnewyork.us/Social-Services/DYCD-after-school-programs-Runaway-And-Homeless-Yo/ujsc-un6m',
     data_format = "CSV",
@@ -61,8 +61,9 @@ nyc_youth_scraper = NYCYouthScraper(
     check_collection = "services",
     dump_collection = "tmpNYCRunawayAndHomelessYouth",
     dupe_collection = "tmpNYCRAHYFoundDuplicates",
-    data_source_collection_name = "NYCRunawayAndHomelessYouth",
-    collection_dupe_field = 'name'
+    data_source_collection_name = data_source_name,
+    collection_dupe_field = 'name',
+    groupby_columns=['address1', 'zip']
     )
 
 

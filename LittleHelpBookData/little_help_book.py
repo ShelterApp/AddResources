@@ -61,17 +61,16 @@ class LHBScraper(BaseScraper):
                                         df['Category'],
                                         df['serviceSummary'])
         df.drop(['Physical Address', 'Category'], axis=1, inplace=True)
-        df = df.groupby(['name', 'phone'], as_index=False).agg({'serviceSummary': ', '.join, 'address1': 'first',
-                                                                  'zip': 'first', 'state': 'first', 'schedule': 'first',
-                                                                'description': 'first', 'website': 'first', 'contactEmail': 'first'})
+        df = self.aggregate_service_summary(df)
         df['source'] = self.source
         return df
 
+data_source_name = "little_help_book"
 
 lhb_scraper = LHBScraper(
-    source="LittleHelpBook",
+    source=data_source_name,
     data_url='https://github.com/OpenEugene/little-help-book-data/raw/master/data/little-help-book.csv',
-    data_page_url='https://github.com/OpenEugene/little-help-book-data/blob/master/data/little-help-book.csv',
+    data_page_url='https://github.com/OpenEugene/little-help-book-data',
     data_format="CSV",
     extract_usecols=[
         "Subcategory", "Service Name", "Phone Number", 'Hours of operation',
@@ -90,15 +89,10 @@ lhb_scraper = LHBScraper(
     check_collection="services",
     dump_collection="tmpLittleHelpBook",
     dupe_collection="tmpLHBDuplicates",
-    data_source_collection_name="LittleHelpBook",
-    collection_dupe_field='name'
+    data_source_collection_name=data_source_name,
+    collection_dupe_field='name',
+    groupby_columns=['name']
 )
 
-'''if __name__ == "__main__":
-    scraped_update_date = lhb_scraper.scrape_updated_date()
-    stored_update_date = lhb_scraper.retrieve_last_scraped_date(client)
-    if stored_update_date is not None:
-        if scraped_update_date < stored_update_date:
-            logging.info('No new data. Goodbye...')
-            sys.exit()'''
+if __name__ == '__main__':
     lhb_scraper.main_scraper(client)

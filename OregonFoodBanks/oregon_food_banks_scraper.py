@@ -47,10 +47,10 @@ class OFBScraper(BaseScraper):
         df.drop(['address2'], axis=1, inplace=True)
         return df
 
-
+data_source_name = 'oregon_food_banks'
 
 ofb_scraper = OFBScraper(
-    source="OregonFoodBanks",
+    source=data_source_name,
     data_url='https://data.oregon.gov/api/views/nvp3-5wtz/rows.csv?accessType=DOWNLOAD',
     data_page_url='https://data.oregon.gov/Business/Filtered-Businesses-Food-Banks/nvp3-5wtz',
     data_format="CSV",
@@ -68,7 +68,7 @@ ofb_scraper = OFBScraper(
     check_collection="services",
     dump_collection="tmpOregonFoodBanks",
     dupe_collection="tmpOregonFoodBanksFoundDuplicates",
-    data_source_collection_name="OregonFoodBanks",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name',
 )
 
