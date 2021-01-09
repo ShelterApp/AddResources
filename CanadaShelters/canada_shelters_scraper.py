@@ -77,3 +77,5 @@ CSS = CanadaSheltersScraper(
 
 if __name__ == "__main__":
     CSS.main_scraper(client)
+
+    
