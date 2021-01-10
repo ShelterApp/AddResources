@@ -83,9 +83,10 @@ def main_scraper(client: MongoClient, scraper_config: ScraperConfig):
             insert_services(df.to_dict('records'), client, scraper_config.dump_collection)
         print('updating scraped update date in data-sources collection')
         try:
-            client['data_sources'].update_one(
+            client['data-sources'].update_one(
                 {"name": scraper_config.data_source_collection_name},
-                {'$set': {'last_updated': datetime.strftime(datetime.now(), '%m/%d/%Y')}}
+                {'$set': {'last_scraped': datetime.strftime(datetime.now(), '%m/%d/%Y')}},
+                upsert=True
             )
         except errors.OperationFailure as e:
             print(e)

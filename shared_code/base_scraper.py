@@ -6,12 +6,15 @@ import requests
 import pandas as pd
 from pymongo import MongoClient, errors
 from tqdm import tqdm
+from pytz import timezone
 
 from shared_code.utils import (
     insert_services, locate_potential_duplicate,
     check_similarity, refresh_ngrams
 )
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class BaseScraper:
     def __init__(self,
@@ -45,21 +48,24 @@ class BaseScraper:
         self._collection_dupe_field: str = collection_dupe_field
 
     def scrape_updated_date(self):
+        """
+        Get html for the page. 
+        
+        Note: Script can only generate static html code (code seen using view source code option) but 
+        won't produce javascript generated html content for the page which browser displays.
+        """
         return requests.get(self.data_page_url, timeout=(6.05, 15)).text
 
-    def retrieve_last_scraped_date(self, client):
-        try:
-            stored_update_date = client['data-sources'].find_one(
-                {"name": self.data_source_collection_name}
-            )['last_updated']
-            stored_update_date = datetime.strptime(
-                str(stored_update_date), '%Y-%m-%d %H:%M:%S'
-            ).date()
-        except Exception as e:
-            logging.info(e)
+    def retrieve_last_scraped_date(self, client) -> datetime.date:        
+        data_source = client['data-sources'].find_one(
+            {"name": self.data_source_collection_name})
+        if data_source is None: 
+            return None
+        stored_update_date = datetime.strptime(
+            str(data_source['last_scraped']), '%Y-%m-%d %H:%M:%S').date()
         if stored_update_date is not False:
             return stored_update_date
-        return False
+        return None
 
     def grab_data(self, df=None) -> pd.DataFrame:
         """Base function for retrieving raw data and performing basic pre-processing
@@ -77,7 +83,7 @@ class BaseScraper:
             df = df
         else:
             df = pd.read_excel(self.data_url, usecols=self.extract_usecols)
-        logging.info(f'initial shape: {df.shape}')
+        logger.info(f'initial shape: {df.shape}')
         df.drop_duplicates(
             subset=self.drop_duplicates_columns,
             inplace=True,
@@ -121,6 +127,29 @@ class BaseScraper:
         df = df.drop(found_duplicates).reset_index(drop=True)
         return df
 
+    def is_new_data_available(self, client: MongoClient) -> bool:
+        """
+        Common routine to check if new data is available for the scraper. 
+        """
+        scraped_update_date = self.scrape_updated_date()
+        stored_update_date = self.retrieve_last_scraped_date(client)
+        if stored_update_date is not None:
+            if scraped_update_date < stored_update_date:                
+                return False
+        return True
+
+    def add_required_fields(self, df: pd.DataFrame):
+        """
+        Add (if doesn't exists) some required fields in documents to be inserted in db collection. e.g. notes.  
+        """
+        if not 'notes' in df:
+            df['notes'] = ''
+        if not 'source' in df:
+           if self.source is not None and self.source != '':
+                df['source'] = self.source
+           else:
+                raise Exception("value for field `source` can't be null or emtpy.")
+
     def main_scraper(self, client: MongoClient) -> None:
         """Base function for ingesting raw data, preparing it and depositing it in MongoDB
 
@@ -128,18 +157,22 @@ class BaseScraper:
             client (MongoClient): connection to the MongoDB instance
             scraper_config (ScraperConfig): instance of the ScraperConfig class
         """
+        if not self.is_new_data_available(client):
+            logger.info('No new data. Goodbye...')
+            return
+
         df = self.grab_data()
         if client[self.dump_collection].estimated_document_count() > 0:
-            logging.info(f'purging duplicates from existing {self.source} collection')
+            logger.info(f'purging duplicates from existing {self.source} collection')
             df = self.purge_collection_duplicates(df, client)
         if client[self.check_collection].estimated_document_count() == 0:
             # No need to check for duplicates in an empty collection
             insert_services(df.to_dict('records'), client, self.dump_collection)
         else:
-            logging.info('refreshing ngrams')
+            logger.info('refreshing ngrams')
             refresh_ngrams(client, self.check_collection)
             found_duplicates = []
-            logging.info('checking for duplicates in the services collection')
+            logger.info('checking for duplicates in the services collection')
             for i in tqdm(range(len(df))):
                 dc = locate_potential_duplicate(
                     df.loc[i, 'name'], df.loc[i, 'zip'], client, self.check_collection
@@ -149,22 +182,24 @@ class BaseScraper:
                         found_duplicates.append(i)
             duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
             if len(duplicate_df) > 0:
-                logging.info(
+                logger.info(
                     f'inserting services dupes into the {self.source} dupe collection'
                 )
                 insert_services(
                     duplicate_df.to_dict('records'), client, self.dupe_collection
                 )
             df = df.drop(found_duplicates).reset_index(drop=True)
-            logging.info(f'final df shape: {df.shape}')
+            logger.info(f'final df shape: {df.shape}')
+            self.add_required_fields(df)
             if len(df) > 0:
                 insert_services(df.to_dict('records'), client, self.dump_collection)
-                logging.info('updating scraped update date in data-sources collection')
-                client['data_sources'].update_one(
+                logger.info('updating scraped update date in data-sources collection')
+                client['data-sources'].update_one(
                     {"name": self.data_source_collection_name},
-                    {'$set': {'last_updated': datetime.strftime(datetime.now(), '%m/%d/%Y')}}
+                    {'$set': {'last_scraped': datetime.strftime(datetime.now(timezone('UTC')).replace(microsecond=0), '%Y-%m-%dT%H:%M:%SZ')}},
+                    upsert=True
                 )
-
+                
     @property
     def source(self) -> str:
         return self._source

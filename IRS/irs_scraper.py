@@ -4,16 +4,13 @@ import os
 import random
 import sys
 from collections import OrderedDict
-
 from datetime import datetime, date
 import pandas as pd
 from pymongo import MongoClient, TEXT
 import re
 import requests
 from tqdm import tqdm
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+import urllib
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
@@ -25,7 +22,8 @@ from shared_code.utils import (
     make_ngrams, locate_potential_duplicate,
     distance, insert_services, get_mongo_client
 )
-import urllib
+
+logger = logging.getLogger(__name__)
 
 # set the DB user name and password in config
 with open('IRS/config.json', 'r') as con:
@@ -76,12 +74,9 @@ def grab_data(config, code_dict):
     df = pd.DataFrame()
     for u in urls:
         logger.info(f'grabbing {u}')
-        response = pd.read_csv(u, usecols=[
-            'EIN', 'NAME', 'STREET', 'CITY', 'STATE', 'ZIP', 'NTEE_CD'
-        ]).rename(columns={
-            'NAME': 'name', 'STREET': 'address1',
-            'CITY': 'city', 'STATE': 'state', 'ZIP': 'zip'
-        }).fillna('0')
+        response = pd.read_csv(u, 
+        usecols=['EIN', 'NAME', 'STREET', 'CITY', 'STATE', 'ZIP', 'NTEE_CD']).rename(
+            columns={'NAME': 'name', 'STREET': 'address1','CITY': 'city', 'STATE': 'state', 'ZIP': 'zip'}).fillna('0')
         logger.info(f'initial shape: {response.shape}')
         response = response[
             response['NTEE_CD'].str.contains(codes)
@@ -148,10 +143,9 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
     scraped_update_date = scrape_updated_date()
     try:
         stored_update_date = client['data-sources'].find_one(
-            {"name": "irs_exempt_organizations"}
-        )['last_updated']
+            {"name": "irs_exempt_organizations"})['last_scraped']
         stored_update_date = datetime.strptime(
-            str(stored_update_date), '%Y-%m-%d %H:%M:%S'
+            str(stored_update_date), '%Y-%m-%d'
         ).date()
         if check_site_for_new_date(stored_update_date):
             logger.info('No new update detected. Exiting script...')
@@ -159,9 +153,10 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
     except KeyError:
         pass
     logger.info('updating scraped update date in data-sources collection')
-    client['data_sources'].update_one(
+    client['data-sources'].update_one(
         {"name": "irs_exempt_organizations"},
-        {'$set': {'last_updated': str(scraped_update_date)}}
+        {'$set': {'last_scraped': str(scraped_update_date)}},
+        upsert=True
     )
     code_dict = config['NTEE_codes']
     df = grab_data(config, code_dict)
@@ -194,8 +189,6 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
         if len(df) > 0:
             insert_services(df.to_dict('records'), client, dump_collection)
 
-
 if __name__ == "__main__":
-
-    client = get_mongo_client(urllib.parse.quote(os.environ.get('DBUSERNAME')), urllib.parse.quote(os.environ.get('PW')))
-    main(config, client, 'services', 'tmpIRS', 'tmpIRSFoundDuplicates')
+    client = get_mongo_client()
+    main(config, client, 'services', 'tmpIRS', 'tmpIRSDuplicates')

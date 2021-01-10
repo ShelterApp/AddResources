@@ -6,8 +6,7 @@ from pymongo import MongoClient, TEXT
 from tqdm import tqdm
 import re
 import urllib
-
-# Establish global variables
+import numpy as np
 
 def get_mongo_client(conn_string): 
     return MongoClient(conn_string)['shelter']
@@ -17,8 +16,8 @@ def get_mongo_client(user, pw):
 
 def get_mongo_client():
     return MongoClient("mongodb+srv://" 
-        + urllib.parse.quote(os.environ["USERNAME"]) + ":" 
-        + urllib.parse.quote(os.environ["PW"]) 
+        + os.environ["DBUSERNAME"] + ":" 
+        + os.environ["PW"] 
         + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")['shelter']
 
 def insert_services(data, client, collection):
@@ -31,7 +30,8 @@ def insert_services(data, client, collection):
     """
     db = client
     db_coll = db[collection]
-    db_coll.insert_many(data)
+    if len(data) > 0:
+        db_coll.insert_many(data)
 
 
 def check_similarity(new_service, existing_service):
@@ -127,6 +127,10 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     Returns:
         str: name of the service that might be a duplicate
     """
+
+    if isinstance(zipcode, np.integer):
+        zipcode = int(zipcode)
+
     grammed_name = make_ngrams(name)
     coll = client[collection]
     dupe_candidate = coll.find_one(
