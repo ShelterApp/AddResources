@@ -24,11 +24,6 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: 'Resolve Project Dependencies Using Pip'
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
     - name: 'Set environmental variables'
       run: |
         #export DBUSERNAME="/some/secret"
@@ -36,6 +31,18 @@ jobs:
         export PW=${{ secrets.DBUSERNAME }}
         echo $DBUSERNAME
         echo $PW
+        
+    - name: 'Show environmental variables'
+      run: |
+        echo "DBUSERNAME:"
+        echo $DBUSERNAME
+        echo "PW:"
+        echo $PW
+        
+    - name: 'Resolve Project Dependencies Using Pip'
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Test with pytest
       run: |
