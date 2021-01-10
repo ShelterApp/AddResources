@@ -33,10 +33,11 @@ jobs:
       run: |
         echo 'python version'
         echo ${{ env.PYTHON_VERSION }}
+        export DBUSERNAME= /some/secret
         #export DBUSERNAME= ${{ secrets.DBUSERNAME }}
         #export PW= ${{ secrets.DBUSERNAME }}
         echo $DBUSERNAME
-        echo $PW
+        #echo $PW
 
     - name: Test with pytest
       run: |
