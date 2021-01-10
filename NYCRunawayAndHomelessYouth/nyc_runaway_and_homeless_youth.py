@@ -30,7 +30,8 @@ class NYCYouthScraper(BaseScraper):
         df['state'], df['city'] = 'NY', 'New York City'
         df['phone'] = df['phone'].str.replace(r'(\d{3})[.](\d{3})[.](\d{4})', r'(\1) \2-\3')
         df = df.applymap(str)
-        df = self.aggregate_service_summary(df)
+        # Concatenating services for facilities with more than one
+        # df = self.aggregate_service_summary(df) (Temporary, not sure yet where toca ll this method)
         if 'zip' in list(df.columns):
             df['zip'] = df['zip'].astype("str")
             df['zip'] = df['zip'].apply(

@@ -61,7 +61,8 @@ class LHBScraper(BaseScraper):
                                         df['Category'],
                                         df['serviceSummary'])
         df.drop(['Physical Address', 'Category'], axis=1, inplace=True)
-        df = self.aggregate_service_summary(df)
+        # Concatenating services for facilities with more than one
+        # df = self.aggregate_service_summary(df) (Temporary, not sure yet where to call this method)
         df['source'] = self.source
         return df
 

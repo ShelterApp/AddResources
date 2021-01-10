@@ -184,6 +184,10 @@ class BaseScraper:
         if client[self.dump_collection].estimated_document_count() > 0:
             logger.info(f'purging duplicates from existing {self.source} collection')
             df = self.purge_collection_duplicates(df, client)
+
+        if self.groupby_columns is not None:
+            df = self.aggregate_service_summary(df)
+
         if client[self.check_collection].estimated_document_count() == 0:
             # No need to check for duplicates in an empty collection
             insert_services(df.to_dict('records'), client, self.dump_collection)

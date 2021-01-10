@@ -50,8 +50,8 @@ class PSScraper(BaseScraper):
         "category": "serviceSummary"
         }, inplace=True)
 
-        '''Concatenating services for facilities with more than one'''
-        df = self.aggregate_service_summary(df)
+        #Concatenating services for facilities with more than one
+        #df = self.aggregate_service_summary(df) (Temporary, not sure yet where toca ll this method)
         df[['address1', 'state', 'zip']] = df['address'].str.extract(r'(.+)([A-Z]{2}).+(\d{5})', expand=True)
         df['city'] = 'Pittsburgh'
         df.drop(['address'], axis=1, inplace=True)
