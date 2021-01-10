@@ -31,9 +31,7 @@ jobs:
 
     - name: 'Set environmental variables'
       run: |
-        echo 'python version'
-        echo ${{ env.PYTHON_VERSION }}
-        export DBUSERNAME= /some/secret
+        export DBUSERNAME="/some/secret"
         #export DBUSERNAME= ${{ secrets.DBUSERNAME }}
         #export PW= ${{ secrets.DBUSERNAME }}
         echo $DBUSERNAME
