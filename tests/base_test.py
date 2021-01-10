@@ -55,12 +55,12 @@ def example_data_source_collection():
     return [{
         '_id': ObjectId('5f137b06236870dae2f1f5e4'),
         'name': 'testingmock',
-        'last_updated': datetime.datetime(2019, 11, 20)
+        'last_scraped': datetime.datetime(2019, 11, 20)
     },
         {
         '_id': ObjectId('5f7a5ab32410168bf92a4ca1'),
         'name': 'othermock',
-        'last_updated': datetime.datetime(2019, 11, 20)
+        'last_scraped': datetime.datetime(2019, 11, 20)
     }]
 
 
