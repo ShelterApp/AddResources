@@ -37,8 +37,8 @@ jobs:
         DBUSERNAME: ${{ secrets.DBUSERNAME }}
         PW: ${{ secrets.PW }}
       run: |
-        echo "DBUSERNAME: " + $DBUSERNAME
-        echo "PW:" + $PW
+        echo "DBUSERNAME: " + "$DBUSERNAME"
+        echo "PW:" + "$PW"
         
     - name: 'Resolve Project Dependencies Using Pip'
       run: |
