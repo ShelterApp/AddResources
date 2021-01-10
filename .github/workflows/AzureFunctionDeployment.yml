@@ -31,11 +31,11 @@ jobs:
 
     - name: 'Set environmental variables'
       run: |
-        export DBUSERNAME="/some/secret"
-        #export DBUSERNAME= ${{ secrets.DBUSERNAME }}
-        #export PW= ${{ secrets.DBUSERNAME }}
+        #export DBUSERNAME="/some/secret"
+        export DBUSERNAME=${{ secrets.DBUSERNAME }}
+        export PW=${{ secrets.DBUSERNAME }}
         echo $DBUSERNAME
-        #echo $PW
+        echo $PW
 
     - name: Test with pytest
       run: |
