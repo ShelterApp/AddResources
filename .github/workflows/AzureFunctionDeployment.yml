@@ -46,6 +46,9 @@ jobs:
         pip install -r requirements.txt
 
     - name: Test with pytest
+      env:
+        DBUSERNAME: ${{ secrets.DBUSERNAME }}
+        PW: ${{ secrets.PW }}
       run: |
         pip install pytest
         pytest
