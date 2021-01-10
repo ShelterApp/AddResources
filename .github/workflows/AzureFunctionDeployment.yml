@@ -33,11 +33,12 @@ jobs:
         echo $PW
         
     - name: 'Show environmental variables'
+      env: 
+        DBUSERNAME: ${{ secrets.DBUSERNAME }}
+        PW: ${{ secrets.PW }}
       run: |
-        echo "DBUSERNAME:"
-        echo $DBUSERNAME
-        echo "PW:"
-        echo $PW
+        echo "DBUSERNAME: " + $DBUSERNAME
+        echo "PW:" + $PW
         
     - name: 'Resolve Project Dependencies Using Pip'
       run: |
