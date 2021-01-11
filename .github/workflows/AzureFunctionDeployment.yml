@@ -24,19 +24,31 @@ jobs:
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
+    - name: 'Set environmental variables'
+      run: |
+        #export DBUSERNAME="/some/secret"
+        export DBUSERNAME=${{ secrets.DBUSERNAME }}
+        export PW=${{ secrets.DBUSERNAME }}
+        echo $DBUSERNAME
+        echo $PW
+        
+    - name: 'Show environmental variables'
+      env: 
+        DBUSERNAME: ${{ secrets.DBUSERNAME }}
+        PW: ${{ secrets.PW }}
+      run: |
+        echo "DBUSERNAME: " + "$DBUSERNAME"
+        echo "PW:" + "$PW"
+        
     - name: 'Resolve Project Dependencies Using Pip'
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: 'Set environmental variables'
-      run: |
-        export DBUSERNAME= ${{ secrets.DBUSERNAME }}
-        export PW= ${{ secrets.DBUSERNAME }}
-        echo $DBUSERNAME
-        echo $PW
-
     - name: Test with pytest
+      env:
+        DBUSERNAME: ${{ secrets.DBUSERNAME }}
+        PW: ${{ secrets.PW }}
       run: |
         pip install pytest
         pytest
