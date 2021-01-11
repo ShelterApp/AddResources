@@ -59,13 +59,9 @@ class BaseScraper:
     def retrieve_last_scraped_date(self, client) -> datetime.date:        
         data_source = client['data-sources'].find_one(
             {"name": self.data_source_collection_name})
-        if data_source is None: 
+        if data_source is None or data_source['last_scraped'] is None: 
             return None
-        stored_update_date = datetime.strptime(
-            str(data_source['last_scraped']), '%Y-%m-%d %H:%M:%S').date()
-        if stored_update_date is not False:
-            return stored_update_date
-        return None
+        return data_source['last_scraped'].date()
 
     def grab_data(self, df=None) -> pd.DataFrame:
         """Base function for retrieving raw data and performing basic pre-processing
@@ -196,7 +192,7 @@ class BaseScraper:
                 logger.info('updating scraped update date in data-sources collection')
                 client['data-sources'].update_one(
                     {"name": self.data_source_collection_name},
-                    {'$set': {'last_scraped': datetime.strftime(datetime.now(timezone('UTC')).replace(microsecond=0), '%Y-%m-%dT%H:%M:%SZ')}},
+                    {'$set': {'last_scraped': datetime.now(timezone('UTC')).replace(microsecond=0).isoformat()}},
                     upsert=True
                 )
                 

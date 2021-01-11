@@ -21,11 +21,11 @@ $vaultName = 'ShelterAppKeyVault'
 $secretName = 'scraper-function-api-key'
 $functionKey = (Get-AzKeyVaultSecret -VaultName $vaultName -Name "$secretName").SecretValue | ConvertFrom-SecureString -AsPlainText
 
-$funcUrl = "https://shelterapp-scrapers.azurewebsites.net/api/$scraperName"
+$funcUrl = "https://shelterapp-scrapers.azurewebsites.net/admin/functions/$scraperName"
 
 $headers = @{
     'Content-Type'  = "application/json"
-    'x-function-key' = "$functionKey"
+    'x-functions-key' = "$functionKey"
 }
 $requestBody = "{}" | ConvertTo-Json
 $azureResponse = Invoke-RestMethod -Uri $funcUrl -Method Post -Body $requestBody -Headers $headers -StatusCodeVariable responseStatus -SkipHttpErrorCheck
