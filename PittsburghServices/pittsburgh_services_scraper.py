@@ -16,7 +16,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -85,14 +85,6 @@ ps_scraper = PS_Scraper(
     collection_dupe_field='name'
     )
 
-
-
-
 if __name__ == "__main__":
-    scraped_update_date = ps_scraper.scrape_updated_date()
-    stored_update_date = ps_scraper.retrieve_last_scraped_date(client)
-    if stored_update_date is not None:
-        if scraped_update_date < stored_update_date:
-            logging.info('No new data. Goodbye...')
-            sys.exit()
+    client = get_mongo_client()    
     ps_scraper.main_scraper(client)

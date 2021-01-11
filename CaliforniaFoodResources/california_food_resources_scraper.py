@@ -15,7 +15,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -75,4 +75,5 @@ if __name__ == "__main__":
     #     if scraped_update_date < stored_update_date:
     #         print('No new data. Goodbye...')
     #         sys.exit()
+    client = get_mongo_client()
     cfr_scraper.main_scraper(client)

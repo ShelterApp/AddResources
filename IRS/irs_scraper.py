@@ -190,5 +190,5 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
             insert_services(df.to_dict('records'), client, dump_collection)
 
 if __name__ == "__main__":
-    client = get_mongo_client(os.environ["DBUSERNAME"], os.environ["PW"])
+    client = get_mongo_client()
     main(config, client, 'services', 'tmpIRS', 'tmpIRSDuplicates')

@@ -10,8 +10,6 @@ from pymongo import MongoClient, errors
 from tqdm import tqdm
 import logging
 
-logger = logging.getLogger(__name__)
-
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
     # add parent directory to sys.path so utils module is accessible
@@ -19,9 +17,11 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
+
+logger = logging.getLogger(__name__)
 
 class DCSheltersScraper(BaseScraper):
     '''For this dataset we need to scrape following columns: FACILITY_NAME(name), CITY(city), ZIP(zip),
@@ -80,5 +80,6 @@ dc_shelters_scraper = DCSheltersScraper(
 
 
 if __name__ == '__main__':
+    client = get_mongo_client() 
     dc_shelters_scraper.main_scraper(client)
 
