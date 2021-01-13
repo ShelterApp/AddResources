@@ -58,9 +58,7 @@ CSS = CanadaSheltersScraper(
         'City/Ville', 'Province Code',
         'Shelter Type'],
     drop_duplicates_columns=[
-        'Shelter Name/Nom du refuge',
-        'City/Ville', 'Province Code',
-        'Shelter Type'],
+        'Shelter Name/Nom du refuge', 'Province Code'],
     rename_columns={
         'Shelter Name/Nom du refuge': 'name',
         'City/Ville': 'city',
