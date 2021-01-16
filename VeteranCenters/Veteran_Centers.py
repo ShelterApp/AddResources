@@ -32,6 +32,7 @@ class VeteranCentersScraper(BaseScraper):
         response = requests.get(url, headers=headers)
         response = StringIO(response.text)
         df = pd.read_csv(response, usecols=self.extract_usecols)
+        df = df[df['id'].str.startswith('v')]
         df.drop_duplicates(
             subset=self.drop_duplicates_columns,
             inplace=True,
@@ -46,7 +47,8 @@ class VeteranCentersScraper(BaseScraper):
             lambda z: z[0:5] if "-" in z else z
         )
         df.drop(['phone_main', 'facility_type', 'physical_zip', 'physical_address_3', 'physical_address_2',
-                 'physical_address_1', 'classification'], axis=1, inplace=True)
+                 'physical_address_1', 'classification', 'id'], axis=1, inplace=True)
+        df.rename(columns=self.rename_columns, inplace=True)
         return df
 
 
@@ -59,7 +61,7 @@ veteran_shelters_scraper = VeteranCentersScraper(
     data_page_url='',
     data_format="CSV",
     extract_usecols=[
-        "name", "facility_type", "website", "phone_main", "physical_city", "physical_state",
+        "name", "id", "facility_type", "website", "phone_main", "physical_city", "physical_state",
         "physical_zip", "physical_address_3", "physical_address_2", "physical_address_1", "classification"
     ],
     drop_duplicates_columns=[
