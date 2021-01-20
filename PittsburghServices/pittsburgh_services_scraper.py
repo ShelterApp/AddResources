@@ -23,7 +23,7 @@ from shared_code.base_scraper import BaseScraper
 
 class PS_Scraper(BaseScraper):
 
-    def scrape_updated_date(data_page_url):
+    def scrape_updated_date(self, data_page_url):
         resp = super().scrape_updated_date()
         soup = BeautifulSoup(resp, 'html.parser')
         date_string = soup.find('span', {'property':'dct:modified'}).text

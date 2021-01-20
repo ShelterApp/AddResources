@@ -11,6 +11,7 @@ import re
 import requests
 from tqdm import tqdm
 import urllib
+from pytz import timezone
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
@@ -22,6 +23,7 @@ from shared_code.utils import (
     make_ngrams, locate_potential_duplicate,
     distance, insert_services, get_mongo_client
 )
+from shared_code.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +44,12 @@ def scrape_updated_date():
     ).date()
     return scraped_date
 
+def retrieve_last_scraped_date(client) -> datetime.date:        
+    data_source = client['data-sources'].find_one(
+        {"name": "irs"})
+    if data_source is None or data_source['last_scraped'] is None: 
+        return None
+    return data_source['last_scraped'].date()
 
 def check_site_for_new_date(existing_date):
     """Check IRS web page with data files to see if the most
@@ -138,24 +146,19 @@ def purge_EIN_duplicates(df, client, collection, dupe_collection):
     df = df.drop(found_duplicates).reset_index(drop=True)
     return df
 
-
 def main(config, client, check_collection, dump_collection, dupe_collection):
     scraped_update_date = scrape_updated_date()
     try:
-        stored_update_date = client['data-sources'].find_one(
-            {"name": "irs_exempt_organizations"})['last_scraped']
-        stored_update_date = datetime.strptime(
-            str(stored_update_date), '%Y-%m-%d'
-        ).date()
-        if check_site_for_new_date(stored_update_date):
+        stored_update_date = retrieve_last_scraped_date(date)
+        if stored_update_date and scraped_update_date <= stored_update_date:
             logger.info('No new update detected. Exiting script...')
             return
     except KeyError:
         pass
-    logger.info('updating scraped update date in data-sources collection')
+    logger.info('updating last scraped date in data-sources collection')
     client['data-sources'].update_one(
-        {"name": "irs_exempt_organizations"},
-        {'$set': {'last_scraped': str(scraped_update_date)}},
+        {"name": "irs"},
+        {'$set': {'last_scraped': datetime.now(timezone('UTC')).replace(microsecond=0).isoformat()}},
         upsert=True
     )
     code_dict = config['NTEE_codes']

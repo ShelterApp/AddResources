@@ -189,7 +189,7 @@ class BaseScraper:
             self.add_required_fields(df)
             if len(df) > 0:
                 insert_services(df.to_dict('records'), client, self.dump_collection)
-                logger.info('updating scraped update date in data-sources collection')
+                logger.info('updating last scraped date in data-sources collection')
                 client['data-sources'].update_one(
                     {"name": self.data_source_collection_name},
                     {'$set': {'last_scraped': datetime.now(timezone('UTC')).replace(microsecond=0).isoformat()}},
