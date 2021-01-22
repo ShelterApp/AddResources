@@ -1,6 +1,6 @@
 {
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [        
         {
             "name": "PowerShell Launch Current File",
             "type": "PowerShell",
@@ -16,7 +16,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Attach to Python Functions",
+            "name": "Attach to Azure Python Functions",
             "type": "python",
             "request": "attach",
             "port": 9091,
