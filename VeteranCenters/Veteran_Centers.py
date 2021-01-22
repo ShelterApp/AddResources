@@ -24,11 +24,13 @@ from shared_code.utils import (
 )
 from shared_code.base_scraper import BaseScraper
 
+api_key = os.environ[VETERANS_API_KEY]
+
 class VeteranCentersScraper(BaseScraper):
 
     def grab_data(self):
         url = 'https://sandbox-api.va.gov/services/va_facilities/v0/facilities/all'
-        headers = {'apikey': '1oavZAY4gJeEPE6atbHdXNN8hvKrXXYX', 'accept': 'text/csv'}
+        headers = {'apikey': api_key, 'accept': 'text/csv'}
         response = requests.get(url, headers=headers)
         response = StringIO(response.text)
         df = pd.read_csv(response, usecols=self.extract_usecols)
