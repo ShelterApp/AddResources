@@ -28,13 +28,13 @@ query {
     name    
   }
 }
-'''
-downloadFile='''
-mutation DownloadFile(
-    $input: FileURIInput!
-    ){
-    createFileDownloadUri
 
+# downloadFile='''
+#mutation DownloadFile(
+#    $input: FileURIInput!
+#    ){
+#    createFileDownloadUri
+#'''
 
 res = gql(user)
 print(res)
