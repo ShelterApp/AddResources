@@ -1,0 +1,48 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "value": "b3f0b9d6-2992-4662-8176-5eb83109cb83"
+        },
+        "name": {
+            "value": "shelterapp-scrapers"
+        },
+        "location": {
+            "value": "West US"
+        },
+        "hostingPlanName": {
+            "value": "ASP-ShelterApp-b27b"
+        },
+        "serverFarmResourceGroup": {
+            "value": "ShelterApp"
+        },
+        "alwaysOn": {
+            "value": false
+        },
+        "storageAccountName": {
+            "value": "storageaccountshelt8a6f"
+        },
+        "sku": {
+            "value": "Dynamic"
+        },
+        "skuCode": {
+            "value": "Y1"
+        },
+        "workerSize": {
+            "value": "0"
+        },
+        "workerSizeId": {
+            "value": "0"
+        },
+        "numberOfWorkers": {
+            "value": "1"
+        },
+        "use32BitWorkerProcess": {
+            "value": false
+        },
+        "linuxFxVersion": {
+            "value": "Python|3.8"
+        }
+    }
+}
