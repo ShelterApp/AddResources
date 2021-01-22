@@ -4,15 +4,14 @@ import os
 import random
 import sys
 from collections import OrderedDict
-
 from datetime import datetime, date
 import pandas as pd
 from pymongo import MongoClient, TEXT
 import re
 import requests
 from tqdm import tqdm
-
-logger = logging.getLogger(__name__)
+import urllib
+from pytz import timezone
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
@@ -22,8 +21,11 @@ del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, refresh_ngrams,
     make_ngrams, locate_potential_duplicate,
-    distance, insert_services, client
+    distance, insert_services, get_mongo_client
 )
+from shared_code.base_scraper import BaseScraper
+
+logger = logging.getLogger(__name__)
 
 # set the DB user name and password in config
 with open('IRS/config.json', 'r') as con:
@@ -42,6 +44,12 @@ def scrape_updated_date():
     ).date()
     return scraped_date
 
+def retrieve_last_scraped_date(client) -> datetime.date:        
+    data_source = client['data-sources'].find_one(
+        {"name": "irs"})
+    if data_source is None or data_source['last_scraped'] is None: 
+        return None
+    return data_source['last_scraped'].date()
 
 def check_site_for_new_date(existing_date):
     """Check IRS web page with data files to see if the most
@@ -74,12 +82,9 @@ def grab_data(config, code_dict):
     df = pd.DataFrame()
     for u in urls:
         logger.info(f'grabbing {u}')
-        response = pd.read_csv(u, usecols=[
-            'EIN', 'NAME', 'STREET', 'CITY', 'STATE', 'ZIP', 'NTEE_CD'
-        ]).rename(columns={
-            'NAME': 'name', 'STREET': 'address1',
-            'CITY': 'city', 'STATE': 'state', 'ZIP': 'zip'
-        }).fillna('0')
+        response = pd.read_csv(u, 
+        usecols=['EIN', 'NAME', 'STREET', 'CITY', 'STATE', 'ZIP', 'NTEE_CD']).rename(
+            columns={'NAME': 'name', 'STREET': 'address1','CITY': 'city', 'STATE': 'state', 'ZIP': 'zip'}).fillna('0')
         logger.info(f'initial shape: {response.shape}')
         response = response[
             response['NTEE_CD'].str.contains(codes)
@@ -141,25 +146,20 @@ def purge_EIN_duplicates(df, client, collection, dupe_collection):
     df = df.drop(found_duplicates).reset_index(drop=True)
     return df
 
-
 def main(config, client, check_collection, dump_collection, dupe_collection):
     scraped_update_date = scrape_updated_date()
     try:
-        stored_update_date = client['data-sources'].find_one(
-            {"name": "irs_exempt_organizations"}
-        )['last_updated']
-        stored_update_date = datetime.strptime(
-            str(stored_update_date), '%Y-%m-%d %H:%M:%S'
-        ).date()
-        if check_site_for_new_date(stored_update_date):
+        stored_update_date = retrieve_last_scraped_date(date)
+        if stored_update_date and scraped_update_date <= stored_update_date:
             logger.info('No new update detected. Exiting script...')
             return
     except KeyError:
         pass
-    logger.info('updating scraped update date in data-sources collection')
+    logger.info('updating last scraped date in data-sources collection')
     client['data-sources'].update_one(
-        {"name": "irs_exempt_organizations"},
-        {'$set': {'last_updated': str(scraped_update_date)}}
+        {"name": "irs"},
+        {'$set': {'last_scraped': datetime.now(timezone('UTC')).replace(microsecond=0).isoformat()}},
+        upsert=True
     )
     code_dict = config['NTEE_codes']
     df = grab_data(config, code_dict)
@@ -192,6 +192,6 @@ def main(config, client, check_collection, dump_collection, dupe_collection):
         if len(df) > 0:
             insert_services(df.to_dict('records'), client, dump_collection)
 
-
 if __name__ == "__main__":
-    main(config, client, 'services', 'tmpIRS', 'tmpIRSFoundDuplicates')
+    client = get_mongo_client()
+    main(config, client, 'services', 'tmpIRS', 'tmpIRSDuplicates')

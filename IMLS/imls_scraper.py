@@ -23,7 +23,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -58,7 +58,7 @@ class ImlsScraper(BaseScraper):
                     latestDate = year
                     latestLink = link['href']
 
-        self._data_url: str = latestLink
+        self._data_url: str = 'https://www.imls.gov' + latestLink
         self._latest_date: datetime = datetime.strptime(str(latestDate), '%Y')
 
     def scrape_updated_date(self) -> str:
@@ -74,7 +74,7 @@ class ImlsScraper(BaseScraper):
                 encoding = "ISO-8859-1")
                 df = super().grab_data(df=df)
                 df['notes'] = np.where((df['STATSTRU'] == '03') | (df['STATSTRU'] == '23'), 'Closed or Temporarily Closed library.', '')
-                df = df.drop(['STATSTRU']).reset_index(drop=True)
+                df.drop(columns=['STATSTRU'], inplace=True)
                 return df
 
     @property
@@ -105,5 +105,6 @@ imls_scraper = ImlsScraper(
 )
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
+    client = get_mongo_client()
     imls_scraper.main_scraper(client)
