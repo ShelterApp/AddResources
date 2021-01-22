@@ -4,7 +4,7 @@ name: Deploy Python project to Azure Function App
 on:
   push:
     branches:
-      - provision_azure_function #temporary, change to master after
+      - master
 
 env:
   AZURE_FUNCTIONAPP_NAME: shelterapp-scrapers # set this to your application's name
@@ -47,7 +47,7 @@ jobs:
         pip install -r requirements.txt --target=".python_packages/lib/site-packages"
         popd
 
-    - name: 'Run Azure Functions Action'
+    - name: 'Deploy Azure Functions'
       uses: Azure/functions-action@v1.1.8
       id: fa
       with:
