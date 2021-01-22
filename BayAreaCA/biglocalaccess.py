@@ -1,7 +1,7 @@
 import requests as req
-from config import *
+import os
 
-token = key
+token = os.environ['SAS']
 endpoint = 'https://api.biglocalnews.org/graphql'
 token_type = 'JWT'
 
