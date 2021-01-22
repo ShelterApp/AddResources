@@ -19,4 +19,4 @@ def main(mytimer: func.TimerRequest, context: func.Context) -> None:
     lhb_scraper.main_scraper(client)
     if mytimer.past_due:
         logging.info('The timer is past due!')
-    logging.info(f'Python timer trigger function for LHB Scraping ran at utc: {utc_timestamp}')
+    logging.info(f'Python timer trigger function for Little Help Book Scraping ran at utc: {utc_timestamp}')

@@ -55,7 +55,11 @@ class BaseScraper:
         
         Note: Script can only generate static html code (code seen using view source code option) but 
         won't produce javascript generated html content for the page which browser displays.
+
+        If data_page_url is empty we can assume we want to scrape this page everytime hence we can return todays date.
         """
+        if self.data_page_url == '' or self.data_page_url is None:
+            return datetime.now(timezone('UTC')).date()
         return requests.get(self.data_page_url, timeout=(6.05, 15)).text
 
     def retrieve_last_scraped_date(self, client) -> datetime.date:        
@@ -98,9 +102,7 @@ class BaseScraper:
         df['source'] = [self.source] * len(df)
         return df
 
-    def purge_collection_duplicates(
-        self, df: pd.DataFrame, client: MongoClient
-    ) -> pd.DataFrame:
+    def purge_collection_duplicates(self, df: pd.DataFrame, client: MongoClient) -> pd.DataFrame:
         """Function to check the pre-processed data and
         delete exact dupes that already exist in the tmp collection
 
@@ -150,7 +152,6 @@ class BaseScraper:
                 left_columns[column] = 'first'
         df = df.groupby(self.groupby_columns, as_index=False).agg(left_columns)
         return df
-
 
     def add_required_fields(self, df: pd.DataFrame):
         """
