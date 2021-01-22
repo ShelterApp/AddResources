@@ -1,15 +1,13 @@
 import json
 from bson import ObjectId
 import os
-
 import pytest
 import mongomock
 from pymongo import MongoClient, TEXT
-
 from IRS import irs_scraper
 from shared_code.utils import (
     make_ngrams, distance, insert_services, check_similarity,
-    locate_potential_duplicate, refresh_ngrams
+    locate_potential_duplicate, refresh_ngrams, get_mongo_client
 )
 
 
@@ -349,11 +347,7 @@ def test_fuzzy_match(
     example_IRS_search_object_with_spelled_out_saint,
     mock_config_object
 ):
-    client = MongoClient(
-        "mongodb+srv://" + os.environ.get('DBUSERNAME')
-        + ":" + os.environ.get('PW')
-        + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority"
-    )['shelter']
+    client = get_mongo_client()
     if 'pytest_fuzzy_test' in client.list_collection_names():
         client.drop_collection('pytest_fuzzy_test')
     client.create_collection('pytest_fuzzy_test')

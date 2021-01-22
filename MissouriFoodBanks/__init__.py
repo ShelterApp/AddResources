@@ -9,7 +9,6 @@ import azure.functions as func
 
 from .missouri_food_banks import mfb_scraper
 
-
 def main(mytimer: func.TimerRequest, context: func.Context) -> None:
     utc_timestamp = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc
@@ -19,4 +18,4 @@ def main(mytimer: func.TimerRequest, context: func.Context) -> None:
     mfb_scraper.main_scraper(client)
     if mytimer.past_due:
         logging.info('The timer is past due!')
-    logging.info(f'Python timer trigger function for MFB Scraping ran at utc: {utc_timestamp}')
+    logging.info(f'Python timer trigger function for Missouri food banks scraping ran at utc: {utc_timestamp}')

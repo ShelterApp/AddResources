@@ -17,7 +17,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -44,10 +44,8 @@ class CanadaSheltersScraper(BaseScraper):
         df = super().grab_data()
         return df
 
-data_source_name = "canada_shelters"
-
 CSS = CanadaSheltersScraper(
-    source=data_source_name,
+    source="CanadaShelterScraper",
     data_url='http://www.edsc-esdc.gc.ca/ouvert-open/hps/'
     'FINAL_CHPDOpenDataNSPL_Dataset-2019_June7_2020.csv',
     data_page_url='https://open.canada.ca/data/en/dataset/'
@@ -58,7 +56,9 @@ CSS = CanadaSheltersScraper(
         'City/Ville', 'Province Code',
         'Shelter Type'],
     drop_duplicates_columns=[
-        'Shelter Name/Nom du refuge', 'Province Code'],
+        'Shelter Name/Nom du refuge',
+        'City/Ville', 'Province Code',
+        'Shelter Type'],
     rename_columns={
         'Shelter Name/Nom du refuge': 'name',
         'City/Ville': 'city',
@@ -67,13 +67,12 @@ CSS = CanadaSheltersScraper(
     service_summary="Shelter",
     check_collection="services",
     dump_collection="tmpCanadaShelters",
-    dupe_collection="tmpCanadaSheltersDuplicates",
-    data_source_collection_name=data_source_name,
+    dupe_collection="tmpCanadaSheltersFoundDuplicates",
+    data_source_collection_name="canada_shelters",
     collection_dupe_field='name',
     encoding='latin-1'
 )
 
 if __name__ == "__main__":
+    client = get_mongo_client()
     CSS.main_scraper(client)
-
-    
