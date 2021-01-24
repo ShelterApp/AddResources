@@ -35,11 +35,14 @@ class Summer_Meal_Sites_2020_Scraper(BaseScraper):
         df = df.drop([ 'contactFirstName', 'contactLastName', 'contactPhone',
        'sponsoringOrganization', 'startDate', 'endDate', 'daysofOperation',
        'comments', 'breakfastTime', 'lunchTime', 'snackTimeAM', 'snackTimePM',
-       'dinnerSupperTime', 'mealTypesServed', 'cycleNumber', 'RecordStatus', 'FNSID', 'Created', 'Season', 'County', 'siteAddress2'],
-       axis = 1)
-
-
+       'dinnerSupperTime', 'mealTypesServed', 'cycleNumber', 'RecordStatus', 'FNSID', 'Created', 'Season', 'County', 'siteAddress2','ext'],
+        axis = 1)
         df = super().grab_data(df = df)
+
+        #Removing schools, and non-homeless related resources
+        filter = df['name'].str.contains('(school|middle|elementary|high|academy|Academy|learn|Boy|Girl|Fire|Bus|College|Apartment|Route|Magnet)', flags = re.IGNORECASE)
+        df = df[~filter]
+
         return df.drop(['OBJECTID'], axis = 1)
 
     def scrape_updated_date(self):
@@ -56,7 +59,7 @@ scraper = Summer_Meal_Sites_2020_Scraper(
     data_format = "DF",
     extract_usecols=None,
     drop_duplicates_columns=['siteName', 'siteAddress', 'siteZip', 'siteCity', 'siteState'],
-    rename_columns={'siteName':'name', 'siteStatus':'notes','siteAddress':'address1','siteCity':'city',
+    rename_columns={'siteName':'name', 'siteStatus':'notes','siteAddress':'address','siteCity':'city',
     'siteState':'state','siteZip':'zip','sitePhone':'phone','Country':'country'
     },
     service_summary="Food Bank",
@@ -70,4 +73,3 @@ scraper = Summer_Meal_Sites_2020_Scraper(
 
 if __name__ == '__main__':
     x = scraper.grab_data()
-    breakpoint()
