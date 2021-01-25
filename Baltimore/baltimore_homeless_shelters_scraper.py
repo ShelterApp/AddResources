@@ -58,7 +58,7 @@ bhs_scraper = BHSScraper(
     service_summary="Homeless Shelter",
     check_collection="services",
     dump_collection="tmpBaltimoreHomelessShelters",
-    dupe_collection="tmpBHSFoundDuplicates",
+    dupe_collection="tmpBaltimoreHSDuplicates",
     data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )

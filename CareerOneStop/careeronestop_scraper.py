@@ -47,9 +47,10 @@ class COS_Scraper(BaseScraper):
         df['service_summary'] = self.service_summary
         return df
 
+data_source_name='career_one_stop'
 
 cos_scraper = COS_Scraper(
-    source="CareerOneStop",
+    source=data_source_name,
     data_url='https://www.careeronestop.org/TridionMultimedia'
     '/tcm24-49673_XLS_AJC_Data_11172020.xls',
     data_page_url='https://www.careeronestop.org/Developers/Data/data-downloads.aspx',
@@ -73,7 +74,7 @@ cos_scraper = COS_Scraper(
     check_collection="services",
     dump_collection="tmpCareerOneStop",
     dupe_collection="tmpCareerOneStopFoundDuplicates",
-    data_source_collection_name="career_one_stop",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='ID'
 )
 
