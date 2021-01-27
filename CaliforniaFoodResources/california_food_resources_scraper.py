@@ -35,9 +35,10 @@ class CFR_Scraper(BaseScraper):
         df['service_summary'] = self.service_summary
         return df
 
+data_source_name = "california_food_resources"
 
 cfr_scraper = CFR_Scraper(
-    source="CaliforniaFoodResources",
+    source=data_source_name,
     data_url="https://controllerdata.lacity.org/api/views/v2mg-qsxf/rows.csv",
     data_page_url='https://controllerdata.lacity.org/dataset'
     '/Food-Resources-in-California/v2mg-qsxf',
@@ -59,8 +60,8 @@ cfr_scraper = CFR_Scraper(
     service_summary="Food Pantry",
     check_collection="services",
     dump_collection="tmpCaliforniaFoodResources",
-    dupe_collection="tmpCaliforniaFoodResourcesFoundDuplicates",
-    data_source_collection_name="california_food_resources",
+    dupe_collection="tmpCaliforniaFRDuplicates",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )
 
