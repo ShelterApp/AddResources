@@ -81,9 +81,9 @@ class ImlsScraper(BaseScraper):
     def latest_date(self) -> datetime:
         return self._latest_date
 
-
+data_source_name='imls'
 imls_scraper = ImlsScraper(
-    source="IMLS",
+    source=data_source_name,
     data_url='https://placeholderurl',
     data_page_url='https://www.imls.gov/research-evaluation/data-collection/public-libraries-survey',
     data_format="DF",
@@ -100,7 +100,7 @@ imls_scraper = ImlsScraper(
     check_collection="services",
     dump_collection="tmpIMLS",
     dupe_collection="tmpIMLSDuplicates",
-    data_source_collection_name="imls",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='LIBNAME'
 )
 

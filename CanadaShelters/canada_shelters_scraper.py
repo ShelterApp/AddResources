@@ -44,8 +44,10 @@ class CanadaSheltersScraper(BaseScraper):
         df = super().grab_data()
         return df
 
+data_source_name='canada_shelters'
+
 CSS = CanadaSheltersScraper(
-    source="CanadaShelterScraper",
+    source=data_source_name,
     data_url='http://www.edsc-esdc.gc.ca/ouvert-open/hps/'
     'FINAL_CHPDOpenDataNSPL_Dataset-2019_June7_2020.csv',
     data_page_url='https://open.canada.ca/data/en/dataset/'
@@ -67,8 +69,8 @@ CSS = CanadaSheltersScraper(
     service_summary="Shelter",
     check_collection="services",
     dump_collection="tmpCanadaShelters",
-    dupe_collection="tmpCanadaSheltersFoundDuplicates",
-    data_source_collection_name="canada_shelters",
+    dupe_collection="tmpCanadaSheltersDuplicates",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name',
     encoding='latin-1'
 )

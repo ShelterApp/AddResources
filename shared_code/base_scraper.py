@@ -31,7 +31,8 @@ class BaseScraper:
                  dupe_collection: str,
                  data_source_collection_name: str,
                  collection_dupe_field: str,
-                 encoding: str = 'utf-8') -> None:
+                 encoding: str = 'utf-8',
+                 groupby_columns: List[str] = None) -> None:
         self._source: str = source
         self._data_url: str = data_url
         self._data_page_url: str = data_page_url
@@ -39,6 +40,7 @@ class BaseScraper:
         self._encoding: str = encoding
         self._extract_usecols: List[str] = extract_usecols
         self._drop_duplicates_columns: List[str] = drop_duplicates_columns
+        self._groupby_columns: List[str] = groupby_columns
         self._rename_columns: dict = rename_columns
         self._service_summary: Any = service_summary
         self._check_collection: str = check_collection
@@ -53,7 +55,11 @@ class BaseScraper:
         
         Note: Script can only generate static html code (code seen using view source code option) but 
         won't produce javascript generated html content for the page which browser displays.
+
+        If data_page_url is empty we can assume we want to scrape this page everytime hence we can return todays date.
         """
+        if self.data_page_url == '' or self.data_page_url is None:
+            return datetime.now(timezone('UTC')).date()
         return requests.get(self.data_page_url, timeout=(6.05, 15)).text
 
     def retrieve_last_scraped_date(self, client) -> datetime.date:        
@@ -96,9 +102,7 @@ class BaseScraper:
         df['source'] = [self.source] * len(df)
         return df
 
-    def purge_collection_duplicates(
-        self, df: pd.DataFrame, client: MongoClient
-    ) -> pd.DataFrame:
+    def purge_collection_duplicates(self, df: pd.DataFrame, client: MongoClient) -> pd.DataFrame:
         """Function to check the pre-processed data and
         delete exact dupes that already exist in the tmp collection
 
@@ -134,6 +138,21 @@ class BaseScraper:
                 return False
         return True
 
+    def aggregate_service_summary(self, df: pd.DataFrame):
+        """
+        If a dataset has repeated resources with different categories,
+        all will be grouped and the categories concatenated with commas in serviceSummary field.
+        :param df:
+        :return:
+        """
+
+        left_columns = {'serviceSummary':', '.join}
+        for column in df:
+            if column not in self.groupby_columns and column != 'serviceSummary':
+                left_columns[column] = 'first'
+        df = df.groupby(self.groupby_columns, as_index=False).agg(left_columns)
+        return df
+
     def add_required_fields(self, df: pd.DataFrame):
         """
         Add (if doesn't exists) some required fields in documents to be inserted in db collection. e.g. notes.  
@@ -158,9 +177,14 @@ class BaseScraper:
             return
 
         df = self.grab_data()
+
         if client[self.dump_collection].estimated_document_count() > 0:
             logger.info(f'purging duplicates from existing {self.source} collection')
             df = self.purge_collection_duplicates(df, client)
+
+        if self.groupby_columns is not None:
+            df = self.aggregate_service_summary(df)
+
         if client[self.check_collection].estimated_document_count() == 0:
             # No need to check for duplicates in an empty collection
             insert_services(df.to_dict('records'), client, self.dump_collection)
@@ -251,3 +275,7 @@ class BaseScraper:
     @property
     def collection_dupe_field(self) -> str:
         return self._collection_dupe_field
+
+    @property
+    def groupby_columns(self) -> List[str]:
+        return self._groupby_columns

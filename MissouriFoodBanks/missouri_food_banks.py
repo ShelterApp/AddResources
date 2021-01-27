@@ -20,7 +20,7 @@ from shared_code.utils import (
 )
 from shared_code.base_scraper import BaseScraper
 
-class MFB_Scraper(BaseScraper):
+class MFBScraper(BaseScraper):
 
     '''For this dataset we need to scrape following columns: Name(name),
     location need to be split into (address1, city, state, zip), phone number(phone),
@@ -41,9 +41,10 @@ class MFB_Scraper(BaseScraper):
         df.drop(['lat', 'space', 'Additional Address Info.'], axis=1, inplace=True)
         return df
 
+data_source_name = "missouri_food_banks"
 
-mfb_scraper = MFB_Scraper(
-    source="MissouriFoodBanks",
+mfb_scraper = MFBScraper(
+    source=data_source_name,
     data_url='https://data.mo.gov/api/views/eb3y-vtsa/rows.csv?accessType=DOWNLOAD',
     data_page_url='https://data.mo.gov/Social-Services/Food-Pantry-List/eb3y-vtsa',
     data_format="CSV",
@@ -60,8 +61,8 @@ mfb_scraper = MFB_Scraper(
     service_summary="Food Bank",
     check_collection="services",
     dump_collection="tmpMissouriFoodBanks",
-    dupe_collection="tmpMissouriFoodBanksFoundDuplicates",
-    data_source_collection_name="MissouriFoodBanks",
+    dupe_collection="tmpMissouriFoodBanksDuplicates",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )
 

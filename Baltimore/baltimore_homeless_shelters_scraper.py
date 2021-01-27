@@ -20,7 +20,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class BHS_Scraper(BaseScraper):
+class BHSScraper(BaseScraper):
 
     '''def scrape_updated_date(data_page_url):
         resp = requests.get(data_page_url, timeout=(6.05, 15)).text
@@ -38,8 +38,10 @@ class BHS_Scraper(BaseScraper):
         return df
 
 
-bhs_scraper = BHS_Scraper(
-    source="BaltimoreHomelessShelters",
+data_source_name = "baltimore_homeless_shelters"
+
+bhs_scraper = BHSScraper(
+    source=data_source_name,
     data_url="https://data.baltimorecity.gov/api/views/hyq3-8sxr/rows.csv?accessType=DOWNLOAD",
     data_page_url='https://data.baltimorecity.gov/Health/Homeless-Shelters/hyq3-8sxr',
     data_format="CSV",
@@ -56,8 +58,8 @@ bhs_scraper = BHS_Scraper(
     service_summary="Homeless Shelter",
     check_collection="services",
     dump_collection="tmpBaltimoreHomelessShelters",
-    dupe_collection="tmpBaltimoreHomelessSheltersFoundDuplicates",
-    data_source_collection_name="baltimore_homeless_shelters",
+    dupe_collection="tmpBaltimoreHSDuplicates",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
 )
 
