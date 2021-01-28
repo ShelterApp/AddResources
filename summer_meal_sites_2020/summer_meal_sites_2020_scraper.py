@@ -16,12 +16,13 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
 class Summer_Meal_Sites_2020_Scraper(BaseScraper):
     def grab_data(self):
+        #Get the data
         data = requests.get('https://opendata.arcgis.com/datasets/9efd2e8ba3104b88921b06fa3f70defb_0.geojson')
         data = data.json()
         data = data['features']
@@ -37,19 +38,26 @@ class Summer_Meal_Sites_2020_Scraper(BaseScraper):
        'comments', 'breakfastTime', 'lunchTime', 'snackTimeAM', 'snackTimePM',
        'dinnerSupperTime', 'mealTypesServed', 'cycleNumber', 'RecordStatus', 'FNSID', 'Created', 'Season', 'County', 'siteAddress2','ext'],
         axis = 1)
-        df = super().grab_data(df = df)
 
         #Removing schools, and non-homeless related resources
-        filter = df['name'].str.contains('(school|middle|elementary|high|academy|Academy|learn|Boy|Girl|Fire|Bus|College|Apartment|Route|Magnet)', flags = re.IGNORECASE)
+        filter = df['siteName'].str.contains('(school|middle|elementary|high|academy|Academy|learn|Boy|Girl|Fire|Bus|College|Apartment|Route|Magnet)', flags = re.IGNORECASE)
         df = df[~filter]
+        df = df.reset_index()
+        df = df.drop(['OBJECTID','index'], axis = 1)
 
-        return df.drop(['OBJECTID'], axis = 1)
+        #fix address
+        df['siteAddress'].str.split(',').str[0]
+
+        #fix phone number
+        df['sitePhone'] = df['sitePhone'].apply(lambda x: "({})-{}-{}".format(x[0:3],x[3:6],x[6:10]))
+
+        return super().grab_data(df = df)
 
     def scrape_updated_date(self):
         data = requests.get('https://opendata.arcgis.com/datasets/9efd2e8ba3104b88921b06fa3f70defb_0.geojson')
         data = data.headers
         data = data['x-amz-meta-contentlastmodified']
-        return datetime.strptime(x['x-amz-meta-contentlastmodified'], '%Y-%m-%dT%H:%M:%S.%fZ')  #Should I add that it is 'UTC' somehow?
+        return datetime.strptime(data, '%Y-%m-%dT%H:%M:%S.%fZ')  #Should I add that it is 'UTC' somehow?
 
 
 scraper = Summer_Meal_Sites_2020_Scraper(
@@ -59,17 +67,18 @@ scraper = Summer_Meal_Sites_2020_Scraper(
     data_format = "DF",
     extract_usecols=None,
     drop_duplicates_columns=['siteName', 'siteAddress', 'siteZip', 'siteCity', 'siteState'],
-    rename_columns={'siteName':'name', 'siteStatus':'notes','siteAddress':'address','siteCity':'city',
+    rename_columns={'siteName':'name', 'siteStatus':'notes','siteAddress':'address1','siteCity':'city',
     'siteState':'state','siteZip':'zip','sitePhone':'phone','Country':'country'
     },
     service_summary="Food Bank",
     check_collection="services",
-    dump_collection="test",
-    dupe_collection="test",
-    data_source_collection_name="test",
-    collection_dupe_field='test'
+    dump_collection="tmp_summer_meal_sites_2020_dump",
+    dupe_collection="tmp_summer_meal_sites_2020_dupe",
+    data_source_collection_name="summer_meal_sites_2020",
+    collection_dupe_field='name'
     )
 
 
 if __name__ == '__main__':
-    x = scraper.grab_data()
+    client=  get_mongo_client()
+    scraper.main_scraper(client)
