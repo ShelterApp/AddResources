@@ -24,7 +24,7 @@ class SummerMealSitesScraper(BaseScraper):
     payload = requests.get('https://opendata.arcgis.com/datasets/9efd2e8ba3104b88921b06fa3f70defb_0.geojson')
     def grab_data(self):
         #Get the data
-        data = payload.json()
+        data = self.payload.json()
 
         data = data['features']
         new_data = []
@@ -40,10 +40,10 @@ class SummerMealSitesScraper(BaseScraper):
         #Removing schools, and non-homeless related resources
         ignore_resources_with_keywords = ['school', 'middle', 'elementary', 'high', 'academy','Academy',
          'learn', 'Boy', 'Girl', 'Fire', 'Bus', 'College', 'Apartment', 'Route', 'Magnet']
-        filter = df['siteName'].str.contains("|".join(ignore_resources_with_keywords_list), flags = re.IGNORECASE)
+        filter = df['siteName'].str.contains("|".join(ignore_resources_with_keywords), flags = re.IGNORECASE)
         df = df[~filter]
         df = df.reset_index()
-        df = df.drop(['OBJECTID','index'], axis = 1)
+        df = df.drop(['index'], axis = 1)
 
         #fix address
         df['siteAddress'].str.split(',').str[0]
@@ -54,7 +54,7 @@ class SummerMealSitesScraper(BaseScraper):
         return super().grab_data(df = df)
 
     def scrape_updated_date(self):
-        data = payload.headers
+        data = self.payload.headers
         data = data['x-amz-meta-contentlastmodified']
         return datetime.strptime(data, '%Y-%m-%dT%H:%M:%S.%fZ')
 
