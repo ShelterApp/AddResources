@@ -20,8 +20,10 @@ from shared_code.utils import (
 )
 from shared_code.base_scraper import BaseScraper
 
+data_url = 'https://opendata.arcgis.com/datasets/9efd2e8ba3104b88921b06fa3f70defb_0.geojson'
+
 class SummerMealSitesScraper(BaseScraper):
-    payload = requests.get('https://opendata.arcgis.com/datasets/9efd2e8ba3104b88921b06fa3f70defb_0.geojson')
+    payload = requests.get(data_url)
     def grab_data(self):
         #Get the data
         data = self.payload.json()
@@ -58,7 +60,6 @@ class SummerMealSitesScraper(BaseScraper):
         data = data['x-amz-meta-contentlastmodified']
         return datetime.strptime(data, '%Y-%m-%dT%H:%M:%S.%fZ')
 
-data_url = 'https://opendata.arcgis.com/datasets/9efd2e8ba3104b88921b06fa3f70defb_0.geojson'
 scraper = SummerMealSitesScraper(
     source="SummerMealSitesScraper",
     data_url = data_url,
@@ -71,9 +72,9 @@ scraper = SummerMealSitesScraper(
     },
     service_summary="Food Bank",
     check_collection="services",
-    dump_collection="tmp_summer_meal_sites_dump",
-    dupe_collection="tmp_summer_meal_sites_dupe",
-    data_source_collection_name="SummerMealSitesScraper",
+    dump_collection="tmpSummerMealSites",
+    dupe_collection="tmpSummerMealSitesDuplicates",
+    data_source_collection_name="summer_meal_sites",
     collection_dupe_field='name'
     )
 
