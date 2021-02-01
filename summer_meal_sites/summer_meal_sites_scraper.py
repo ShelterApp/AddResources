@@ -60,8 +60,10 @@ class SummerMealSitesScraper(BaseScraper):
         data = data['x-amz-meta-contentlastmodified']
         return datetime.strptime(data, '%Y-%m-%dT%H:%M:%S.%fZ')
 
+data_source_name = 'summer_meal_sites'
+
 scraper = SummerMealSitesScraper(
-    source="SummerMealSitesScraper",
+    source=data_source_name,
     data_url = data_url,
     data_page_url = data_url,
     data_format = "DF",
@@ -74,7 +76,7 @@ scraper = SummerMealSitesScraper(
     check_collection="services",
     dump_collection="tmpSummerMealSites",
     dupe_collection="tmpSummerMealSitesDuplicates",
-    data_source_collection_name="summer_meal_sites",
+    data_source_collection_name=data_source_name,
     collection_dupe_field='name'
     )
 
