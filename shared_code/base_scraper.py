@@ -12,7 +12,7 @@ from dateutil.parser import parse
 
 from shared_code.utils import (
     insert_services, locate_potential_duplicate,
-    check_similarity, refresh_ngrams
+    check_similarity, refresh_ngrams, validate_data
 )
 
 logging.basicConfig(level=logging.DEBUG)
@@ -140,84 +140,6 @@ class BaseScraper:
                 return False
         return True
 
-    def validate_data(self, df):
-        #Check if all the required columns ('name', 'address1', 'city', 'state', 'zip') are in the dataframe
-        requiredColumns = ['name', 'address1', 'city', 'state', 'zip']
-        missingColumns = []
-        for column in requiredColumns:
-            if not column in df.columns:
-                missingColumns.append(column)
-        if len(missingColumns) > 0:
-            logger.info("The following column(s) are missing from the dataframe: " + str(missingColumns))
-            return False
-
-        nullValues = pd.isna(df)
-        goodSummaries = {'Emergency Shelter', 'Support Services', 'Food Bank', 'Food Pantry', 'Soup Kitchen',
-                         'Legal Assistance', 'Medical Clinic', 'Library', 'Computers', 'Internet', 'Books',
-                         'Charging Stations', 'Restrooms', 'Senior Resources', 'Rent Assistance',
-                         'Free Pregnancy Testing', 'Domestic Violence Shelter', 'Job Training', 'Clothing',
-                         'Disabled Resources', 'Employment Assistance', 'Substance Abuse Treatment',
-                         'Transitional Housing', 'Financial Assistance', 'Mental Health Services'}
-
-        for index, row in df.iterrows():
-            foundBadData = False
-            cityMissing = False
-            stateMissing = False
-            zipMissing = False
-
-            #Check if the row called 'name' is not null or 'NONE'
-            if nullValues['name'][index]:
-                logger.info(" row " + str(index + 1) + ": \'name\' cannot be a null value")
-                foundBadData = True
-            elif row['name'].upper() == "NONE":
-                logger.info(" row " + str(index + 1) + ": \'name\' cannot be \'" + row['name'] + "\'")
-                foundBadData = True
-
-            #Check if the row called 'city' is not null or 'NONE'
-            if nullValues['city'][index]:
-                logger.info(" row " + str(index + 1) + ": \'city\' cannot be a null value")
-                cityMissing = True
-            elif row['city'].upper() == 'NONE':
-                logger.info(" row " + str(index + 1) + ": \'city\' cannot be \'" + row['city'] + "\'")
-                cityMissing = True
-
-            # Check if the row called 'state' is not null or 'NONE'
-            if nullValues['state'][index]:
-                logger.info(" row " + str(index + 1) + ": \'state\' cannot be a null value")
-                stateMissing = True
-            elif row['state'].upper() == 'NONE':
-                logger.info(" row " + str(index + 1) + ": \'state\' cannot be \'" + row['state'] + "\'")
-                stateMissing = True
-
-            # Check if the row called 'zip' is not null or 'NONE'
-            if nullValues['zip'][index]:
-                logger.info(" row " + str(index + 1) + ": \'zip\' cannot be a null value")
-                zipMissing = True
-            elif str(row['zip']).upper() == 'NONE':
-                logger.info(" row " + str(index + 1) + ": \'zip\' cannot be \'" + row['zip'] + "\'")
-                zipMissing = True
-
-            # Check if the row called 'serviceSummary' is not null or 'NONE'
-            if nullValues['serviceSummary'][index]:
-                logger.info(" row " + str(index + 1) + ": \'serviceSummary\' was a null value but must be one of the " +
-                            "following: " + str(goodSummaries))
-                foundBadData = True
-            elif row['serviceSummary'] not in goodSummaries:
-                logger.info(" row " + str(index + 1) + ": \'serviceSummary\' got " + row['serviceSummary'] +
-                            " but must be one of the following: " + str(goodSummaries))
-                foundBadData = True
-
-            #The row should be removed if at least one of the following is true:
-                #The 'name' column is missing
-                #The 'city', 'state', and 'zip' columns are all either null or 'NONE'
-                #The 'serviceSummary' column is missing
-            if cityMissing and stateMissing and zipMissing:
-                foundBadData = True
-            if foundBadData:
-                df.drop(index, inplace=True)
-
-        return True
-
     def aggregate_service_summary(self, df: pd.DataFrame):
         """
         If a dataset has repeated resources with different categories,
@@ -257,9 +179,10 @@ class BaseScraper:
             return
 
         df = self.grab_data()
-        # Only add the data if the dataframe contains each of the following fields: name, address1, city, state, zip
-        if not self.validate_data(df):
-            return
+
+        # Only add data complicit with ShelterApp's rules
+        validate_data(df)
+
         if client[self.dump_collection].estimated_document_count() > 0:
             logger.info(f'purging duplicates from existing {self.source} collection')
             df = self.purge_collection_duplicates(df, client)
