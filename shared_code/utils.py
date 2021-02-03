@@ -2,6 +2,7 @@ import logging
 import os
 from collections import OrderedDict
 
+import pandas as pd
 from pymongo import MongoClient, TEXT
 from tqdm import tqdm
 import re
@@ -23,7 +24,7 @@ def get_mongo_client(arg1=None, arg2=None):
     else:
         return MongoClient("mongodb+srv://" 
         + os.environ["DBUSERNAME"] + ":" 
-        + os.environ["PW"] 
+        + os.environ["PW"]
         + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")[db_name]
     
 def insert_services(data, client, collection):
@@ -145,3 +146,40 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     if dupe_candidate is not None:
         return dupe_candidate["name"]
     return False
+
+
+def validate_data(df):
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+
+    # Check if all the required columns ('name', 'address1', 'city', 'state', 'zip', 'serviceSummary')
+    # are in the dataframe
+    requiredColumns = ['name', 'address1', 'city', 'state', 'zip', 'serviceSummary']
+    missingColumns = []
+    for column in requiredColumns:
+        if not column in df.columns:
+            missingColumns.append(column)
+    if len(missingColumns) > 0:
+        raise Exception('The data frame does not contain the following column(s): ' + str(missingColumns))
+
+    rows_to_drop = set()
+
+    # Identifies any row that contains a null or 'NONE' value in the 'name', 'address1', or 'serviceSummary' columns as
+    # invalid
+    for column in ['name', 'address1', 'serviceSummary']:
+        df_none = df[(df[column].isna()) | (df[column] == '') | (df[column].str.upper() == 'NONE')].index.values
+        if len(df_none) > 0:
+            logger.error(" null or invalid values found for \'" + column + "\' column in rows: " + str(df_none))
+            rows_to_drop = rows_to_drop.union(df_none)
+
+    # Identifies any row that contains a null or 'NONE' value in the 'city', 'state', and 'zip' columns as invalid
+    df_none = df[((df['city'].isna()) | (df['city'] == '') | (df['city'].str.upper() == 'NONE')) &
+                 ((df['state'].isna()) | (df['state'] == '') | (df['state'].str.upper() == 'NONE')) &
+                 ((df['zip'].isna()) | (df['zip'] == '') | (df['zip'].str.upper() == 'NONE'))].index.values
+    if len(df_none) > 0:
+        logger.error(" null or invalid values found for \'city\', \'state\', and \'zip\' columns in rows: " +
+                     str(df_none))
+        rows_to_drop = rows_to_drop.union(df_none)
+
+    # Removes any row that was previously identified as invalid
+    df.drop(rows_to_drop, inplace=True)
