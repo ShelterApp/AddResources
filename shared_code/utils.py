@@ -9,6 +9,11 @@ import re
 import urllib
 import numpy as np
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+pd.set_option("display.max_rows", None, "display.max_columns", None)
+
 def get_mongo_client(arg1=None, arg2=None):
     db_name = 'shelter'
     if arg1 and arg2:
@@ -149,9 +154,6 @@ def locate_potential_duplicate(name, zipcode, client, collection):
 
 
 def validate_data(df):
-    logging.basicConfig(level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-
     # Check if all the required columns ('name', 'address1', 'city', 'state', 'zip', 'serviceSummary')
     # are in the dataframe
     requiredColumns = ['name', 'address1', 'city', 'state', 'zip', 'serviceSummary']
@@ -160,26 +162,32 @@ def validate_data(df):
         if not column in df.columns:
             missingColumns.append(column)
     if len(missingColumns) > 0:
-        raise Exception('The data frame does not contain the following column(s): ' + str(missingColumns))
+        raise Exception('The data frame does not contain the following required column(s): ' + str(missingColumns))
 
-    rows_to_drop = set()
+    columns_to_display = ['name', 'city', 'state', 'zip']
+
+    found_error = False
 
     # Identifies any row that contains a null or 'NONE' value in the 'name', 'address1', or 'serviceSummary' columns as
     # invalid
     for column in ['name', 'address1', 'serviceSummary']:
-        df_none = df[(df[column].isna()) | (df[column] == '') | (df[column].str.upper() == 'NONE')].index.values
-        if len(df_none) > 0:
-            logger.error(" null or invalid values found for \'" + column + "\' column in rows: " + str(df_none))
-            rows_to_drop = rows_to_drop.union(df_none)
+        df_errors = df[empty_slots(df, column)]
+        if len(df_errors) > 0:
+            found_error = True
+            logger.error(" null or invalid values found for \'" + column + "\' column in rows: "
+                         + str(df_errors.index.values))
+            logger.error(df_errors[columns_to_display])
 
     # Identifies any row that contains a null or 'NONE' value in the 'city', 'state', and 'zip' columns as invalid
-    df_none = df[((df['city'].isna()) | (df['city'] == '') | (df['city'].str.upper() == 'NONE')) &
-                 ((df['state'].isna()) | (df['state'] == '') | (df['state'].str.upper() == 'NONE')) &
-                 ((df['zip'].isna()) | (df['zip'] == '') | (df['zip'].str.upper() == 'NONE'))].index.values
-    if len(df_none) > 0:
+    df_errors = df[(empty_slots(df, 'city') | empty_slots(df, 'state')) & empty_slots(df, 'zip')]
+    if len(df_errors) > 0:
+        found_error = True
         logger.error(" null or invalid values found for \'city\', \'state\', and \'zip\' columns in rows: " +
-                     str(df_none))
-        rows_to_drop = rows_to_drop.union(df_none)
+                     str(df_errors.index.values))
+        logger.error(df_errors[columns_to_display])
 
-    # Removes any row that was previously identified as invalid
-    df.drop(rows_to_drop, inplace=True)
+    if found_error:
+        raise Exception('Some rows have invalid data. Check logs for details.')
+
+def empty_slots(df, column):
+    return (df[column].isna()) | (df[column] == '') | (df[column].str.upper() == 'NONE')
