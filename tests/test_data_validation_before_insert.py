@@ -2,6 +2,7 @@ import os
 import sys
 import pandas as pd
 import logging
+import pytest
 from shared_code.utils import validate_data
 
 logger = logging.getLogger(__name__)

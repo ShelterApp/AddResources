@@ -179,8 +179,7 @@ def validate_data(df):
             logger.error(df_errors[columns_to_display])
 
     # Identifies any row that contains a null or 'NONE' value in the 'city', 'state', and 'zip' columns as invalid
-    df_errors = df[((empty_slots(df, 'city') | empty_slots(df, 'state')) & empty_slots(df, 'zip')) |
-                   (empty_slots(df, 'city') & empty_slots(df, 'state'))]
+    df_errors = df[(empty_slots(df, 'city') | empty_slots(df, 'state')) & empty_slots(df, 'zip')]
     if len(df_errors) > 0:
         found_error = True
         logger.error(" null or invalid values found for \'city\', \'state\', and \'zip\' columns in rows: " +
