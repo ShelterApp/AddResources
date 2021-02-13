@@ -103,7 +103,7 @@ class BaseScraper:
         return df
 
     def purge_dupe_collection_duplicates(self,df: pd.DataFrame, client: MongoClient):
-        """ Gets exact duplicates in df that are in the existing dupe collection for scraper
+        """ Purges df of exact duplicates that are in the existing dupe collection for scraper
         """
         dupe_collection_duplicates = []
         coll = client[self.dupe_collection]
