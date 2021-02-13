@@ -222,7 +222,8 @@ class BaseScraper:
             duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
             if len(duplicate_df) > 0:
                 logger.info("Purging Duplicates that are already in the" + self.dupe_collection + "collection")
-                duplicate_df = self.purge_collection_duplicates(duplicate_df, client)
+                duplicate_df = self.purge_dupe_collection_duplicates(duplicate_df, client)
+
                 logger.info(
                     f'inserting services dupes into the {self.source} dupe collection'
                 )
