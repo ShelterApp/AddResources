@@ -155,7 +155,7 @@ def locate_potential_duplicate(name, zipcode, client, collection):
 
 def validate_data(df):
     # Check if all the required columns ('name', 'address1', 'city', 'state', 'zip', 'serviceSummary')
-    # are in the dataframe
+    # are in the data frame
     requiredColumns = ['name', 'address1', 'city', 'state', 'zip', 'serviceSummary']
     missingColumns = []
     for column in requiredColumns:
@@ -188,6 +188,13 @@ def validate_data(df):
 
     if found_error:
         raise Exception('Some rows have invalid data. Check logs for details.')
+
+    # Checks if there are duplicated rows in terms of the columns 'name', 'address1', 'city', 'state', and 'zip'
+    df1 = df[df.groupby(['name', 'address1', 'city', 'state', 'zip'])['serviceSummary'].transform('count') > 1]
+    if len(df1) > 0:
+        logger.error(df1)
+        raise Exception('Duplicate rows have been found. Check logs for details.')
+
 
 def empty_slots(df, column):
     return (df[column].isna()) | (df[column] == '') | (df[column].str.upper() == 'NONE')
