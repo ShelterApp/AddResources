@@ -42,6 +42,13 @@ def test_validator_on_duplicates():
                     'and hence can be combined into single entry.')
 
 
+# This test checks if the script validator will throw an exception if there are duplicated rows in terms of the columns
+# 'name', 'address1', 'city', 'state', and 'zip'
+def test_validator_on_duplicates():
+    df = pd.read_csv('tests/test_data_validation_duplicates.csv')
+    check_validator(df, False)
+
+
 # This test checks if the script validator will not throw an exception if none of the rows contain invalid data
 # and if all the necessary columns are present
 def test_validator_valid_data():
