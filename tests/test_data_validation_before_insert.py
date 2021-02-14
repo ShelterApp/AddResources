@@ -14,16 +14,23 @@ if _i not in sys.path:
 del _i  # clean up global name space
 
 
-# This test checks if the script validator can throw an exception if there are any rows with invalid data
+# This test checks if the script validator will throw an exception if there are any rows with invalid data
 def test_validator_on_rows():
     df = pd.read_csv('tests/test_data_validation_before_insert.csv')
     check_validator(df, False)
 
 
-# This test checks if the script validator can throw an exception if any of the necessary columns are missing
+# This test checks if the script validator will throw an exception if any of the necessary columns are missing
 def test_validator_on_columns():
     lst = [['Name0', 'Address0'], ['Name1', 'Address1'], ['Name2', 'Address2'], ['Name3', 'Address3']]
     df = pd.DataFrame(lst, columns=['name', 'address1'])
+    check_validator(df, False)
+
+
+# This test checks if the script validator will throw an exception if there are duplicated rows in terms of the columns
+# 'name', 'address1', 'city', 'state', and 'zip'
+def test_validator_on_duplicates():
+    df = pd.read_csv('tests/test_data_validation_duplicates.csv')
     check_validator(df, False)
 
 
