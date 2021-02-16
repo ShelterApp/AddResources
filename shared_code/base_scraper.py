@@ -51,9 +51,9 @@ class BaseScraper:
 
     def scrape_updated_date(self):
         """
-        Get html for the page. 
-        
-        Note: Script can only generate static html code (code seen using view source code option) but 
+        Get html for the page.
+
+        Note: Script can only generate static html code (code seen using view source code option) but
         won't produce javascript generated html content for the page which browser displays.
 
         If data_page_url is empty we can assume we want to scrape this page everytime hence we can return todays date.
@@ -62,10 +62,10 @@ class BaseScraper:
             return datetime.now(timezone('UTC')).date()
         return requests.get(self.data_page_url, timeout=(6.05, 15)).text
 
-    def retrieve_last_scraped_date(self, client) -> datetime.date:        
+    def retrieve_last_scraped_date(self, client) -> datetime.date:
         data_source = client['data-sources'].find_one(
             {"name": self.data_source_collection_name})
-        if data_source is None or data_source['last_scraped'] is None: 
+        if data_source is None or data_source['last_scraped'] is None:
             return None
         return data_source['last_scraped'].date()
 
@@ -102,6 +102,22 @@ class BaseScraper:
         df['source'] = [self.source] * len(df)
         return df
 
+    def purge_dupe_collection_duplicates(self,df: pd.DataFrame, client: MongoClient):
+        """ Purges df of exact duplicates that are in the existing dupe collection for scraper
+        """
+        dupe_collection_duplicates = []
+        coll = client[self.dupe_collection]
+        for i in tqdm(range(len(df))):
+            idx = df.iloc[i]
+            filter = {}
+            for drop_col in self.drop_duplicate_columns:
+                filter[drop_col] = idx[drop_col]
+            dupe = coll.find_one(filter)
+            if dupe is not None:
+                dupe_collection_duplicates.append(i)
+        return df.loc[df.index.difference(dupe_collection_duplicates)].reset_index(drop=True)
+
+
     def purge_collection_duplicates(self, df: pd.DataFrame, client: MongoClient) -> pd.DataFrame:
         """Function to check the pre-processed data and
         delete exact dupes that already exist in the tmp collection
@@ -122,19 +138,22 @@ class BaseScraper:
             )
             if dupe is not None:
                 found_duplicates.append(i)
+
         duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
+        duplicate_df = self.purge_dupe_collection_duplicates(duplicate_df, client)
+
         insert_services(duplicate_df.to_dict('records'), client, self.dupe_collection)
         df = df.drop(found_duplicates).reset_index(drop=True)
         return df
 
     def is_new_data_available(self, client: MongoClient) -> bool:
         """
-        Common routine to check if new data is available for the scraper. 
+        Common routine to check if new data is available for the scraper.
         """
         scraped_update_date = self.scrape_updated_date()
         stored_update_date = self.retrieve_last_scraped_date(client)
         if stored_update_date is not None:
-            if scraped_update_date < stored_update_date:                
+            if scraped_update_date < stored_update_date:
                 return False
         return True
 
@@ -155,7 +174,7 @@ class BaseScraper:
 
     def add_required_fields(self, df: pd.DataFrame):
         """
-        Add (if doesn't exists) some required fields in documents to be inserted in db collection. e.g. notes.  
+        Add (if doesn't exists) some required fields in documents to be inserted in db collection. e.g. notes.
         """
         if not 'notes' in df:
             df['notes'] = ''
@@ -202,6 +221,9 @@ class BaseScraper:
                         found_duplicates.append(i)
             duplicate_df = df.loc[found_duplicates].reset_index(drop=True)
             if len(duplicate_df) > 0:
+                logger.info("Purging Duplicates that are already in the" + self.dupe_collection + "collection")
+                duplicate_df = self.purge_dupe_collection_duplicates(duplicate_df, client)
+
                 logger.info(
                     f'inserting services dupes into the {self.source} dupe collection'
                 )
@@ -219,7 +241,7 @@ class BaseScraper:
                     {'$set': {'last_scraped': datetime.now(timezone('UTC')).replace(microsecond=0).isoformat()}},
                     upsert=True
                 )
-                
+
     @property
     def source(self) -> str:
         return self._source
