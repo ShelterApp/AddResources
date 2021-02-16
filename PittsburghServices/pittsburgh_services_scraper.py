@@ -21,7 +21,7 @@ from shared_code.utils import (
 from shared_code.base_scraper import BaseScraper
 
 
-class PSScraper(BaseScraper):
+class PS_Scraper(BaseScraper):
 
     def scrape_updated_date(self, data_page_url):
         resp = super().scrape_updated_date()
@@ -51,8 +51,8 @@ class PSScraper(BaseScraper):
         }, inplace=True)
 
         '''Concatenating services for facilities with more than one'''
-        df = self.aggregate_service_summary(df)
-        df[['address1', 'state', 'zip']] = df['address'].str.extract(r'(.+)([A-Z]{2}).+(\d{5})', expand=True)
+        df = df.groupby(df['address'], as_index=False).agg({'serviceSummary': '; '.join, 'name': 'first'})
+        df[['address1','state', 'zip']] = df['address'].str.extract(r'(.+)([A-Z]{2}).+(\d{5})', expand=True)
         df['city'] = 'Pittsburgh'
         df.drop(['address'], axis=1, inplace=True)
         return df
@@ -60,10 +60,10 @@ class PSScraper(BaseScraper):
 
 
 
-data_source_name = 'pittsburgh_services'
 
-ps_scraper = PSScraper(
-    source=data_source_name,
+
+ps_scraper = PS_Scraper(
+    source="PittsburghServicesScraper",
     data_url = 'https://data.wprdc.org/datastore/dump/5a05b9ec-2fbf-43f2-bfff-1de2555ff7d4',
     data_page_url = 'https://catalog.data.gov/dataset/bigburgh-social-service-listings',
     data_format = "CSV",
@@ -80,10 +80,9 @@ ps_scraper = PSScraper(
     service_summary="",
     check_collection="services",
     dump_collection="tmpPittsburghServices",
-    dupe_collection="tmpPittsburghServicesDuplicates",
-    data_source_collection_name=data_source_name,
-    collection_dupe_field='name',
-    groupby_columns=['address']
+    dupe_collection="tmpPittsburghServicesFoundDuplicates",
+    data_source_collection_name="pittsburgh_services",
+    collection_dupe_field='name'
     )
 
 if __name__ == "__main__":

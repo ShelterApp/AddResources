@@ -48,9 +48,9 @@ class HUD_Scraper(BaseScraper):
         df['service_summary'] = service_summaries
         return df
 
-
+data_source_name="hud_pit_hic_data"
 hud_scraper = HUD_Scraper(
-    source='HUD',
+    source=data_source_name,
     data_url='https://www.huduser.gov/portal/sites/default/files/xls/2019'
     '-Housing-Inventory-County-RawFile.xlsx',
     data_page_url='https://www.hudexchange.info/resource/3031/pit-and-hic-data-since-2007/',
@@ -72,7 +72,7 @@ hud_scraper = HUD_Scraper(
     check_collection='services',
     dump_collection='tmpHUD',
     dupe_collection='tmpHUDFoundDuplicates',
-    data_source_collection_name='hud_pit_hic_data',
+    data_source_collection_name=data_source_name,
     collection_dupe_field='Project ID'
 )
 

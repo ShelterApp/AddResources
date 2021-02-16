@@ -16,7 +16,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -29,8 +29,9 @@ class NYCYouthScraper(BaseScraper):
         df = super().grab_data()
         df['state'], df['city'] = 'NY', 'New York City'
         df['phone'] = df['phone'].str.replace(r'(\d{3})[.](\d{3})[.](\d{4})', r'(\1) \2-\3')
-        df = df.applymap(str)
-        df = self.aggregate_service_summary(df)
+        df = df.astype(str)
+        # Concatenating services for facilities with more than one
+        # df = self.aggregate_service_summary(df) (Temporary, not sure yet where toca ll this method)
         if 'zip' in list(df.columns):
             df['zip'] = df['zip'].astype("str")
             df['zip'] = df['zip'].apply(
@@ -68,6 +69,7 @@ nyc_youth_scraper = NYCYouthScraper(
 
 
 if __name__ == '__main__':
+    client = get_mongo_client()
     nyc_youth_scraper.main_scraper(client)
 
     

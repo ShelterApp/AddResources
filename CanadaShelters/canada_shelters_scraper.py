@@ -44,7 +44,7 @@ class CanadaSheltersScraper(BaseScraper):
         df = super().grab_data()
         return df
 
-data_source_name = "canada_shelters"
+data_source_name='canada_shelters'
 
 CSS = CanadaSheltersScraper(
     source=data_source_name,
@@ -78,5 +78,3 @@ CSS = CanadaSheltersScraper(
 if __name__ == "__main__":
     client = get_mongo_client()
     CSS.main_scraper(client)
-
-    

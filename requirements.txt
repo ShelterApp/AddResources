@@ -1,7 +1,7 @@
 attrs==20.2.0
 azure.functions==1.4.0
 beautifulsoup4==4.9.3
-bleach==3.2.1
+bleach==3.3.0
 bson==0.5.10
 certifi==2020.6.20
 chardet==3.0.4

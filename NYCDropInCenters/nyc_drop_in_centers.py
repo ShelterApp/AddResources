@@ -16,7 +16,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -61,6 +61,7 @@ nyc_scraper = NYCScraper(
     )
 
 if __name__ == '__main__':
+    client = get_mongo_client()
     nyc_scraper.main_scraper(client)
 
     

@@ -16,7 +16,7 @@ if _i not in sys.path:
 del _i  # clean up global name space
 from shared_code.utils import (
     check_similarity, locate_potential_duplicate,
-    insert_services, client
+    insert_services, get_mongo_client
 )
 from shared_code.base_scraper import BaseScraper
 
@@ -61,7 +61,8 @@ class LHBScraper(BaseScraper):
                                         df['Category'],
                                         df['serviceSummary'])
         df.drop(['Physical Address', 'Category'], axis=1, inplace=True)
-        df = self.aggregate_service_summary(df)
+        # Concatenating services for facilities with more than one
+        # df = self.aggregate_service_summary(df) (Temporary, not sure yet where to call this method)
         df['source'] = self.source
         return df
 
@@ -95,4 +96,5 @@ lhb_scraper = LHBScraper(
 )
 
 if __name__ == '__main__':
+    client = get_mongo_client()
     lhb_scraper.main_scraper(client)
