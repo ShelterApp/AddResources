@@ -179,7 +179,8 @@ def validate_data(df):
             logger.error(df_errors[columns_to_display])
 
     # Identifies any row that contains a null or 'NONE' value in the 'city', 'state', and 'zip' columns as invalid
-    df_errors = df[(empty_slots(df, 'city') | empty_slots(df, 'state')) & empty_slots(df, 'zip')]
+    df_errors = df[((empty_slots(df, 'city') | empty_slots(df, 'state')) & empty_slots(df, 'zip')) |
+                   (empty_slots(df, 'city') & empty_slots(df, 'state'))]
     if len(df_errors) > 0:
         found_error = True
         logger.error(" null or invalid values found for \'city\', \'state\', and \'zip\' columns in rows: " +
@@ -190,10 +191,20 @@ def validate_data(df):
         raise Exception('Some rows have invalid data. Check logs for details.')
 
     # Checks if there are duplicated rows in terms of the columns 'name', 'address1', 'city', 'state', and 'zip'
-    df1 = df[df.groupby(['name', 'address1', 'city', 'state', 'zip'])['serviceSummary'].transform('count') > 1]
+    df1 = df[df.apply(lambda x: x.astype(str).str.lower()).groupby(['name', 'address1', 'city', 'state', 'zip',
+                                                                    'serviceSummary'])['serviceSummary'].transform(
+                                                                    'count') > 1]
     if len(df1) > 0:
         logger.error(df1)
-        raise Exception('Duplicate rows have been found. Check logs for details.')
+        raise Exception('There are duplicate rows in the data. Check logs for details.')
+
+    # Checks if there are duplicated rows in terms of the columns 'name', 'address1', 'city', 'state', and 'zip'
+    df1 = df[df.apply(lambda x: x.astype(str).str.lower()).groupby(['name', 'address1', 'city', 'state',
+                                                                    'zip'])['serviceSummary'].transform('count') > 1]
+    if len(df1) > 0:
+        logger.error(df1)
+        raise Exception('There are duplicate entries in data which only differ in the serviceSummary field and hence ' +
+                        'can be combined into single entry.')
 
 
 def empty_slots(df, column):
