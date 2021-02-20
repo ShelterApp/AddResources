@@ -26,6 +26,7 @@ with open('IRS/config.json', 'r') as con:
     # config (dict): config object imported from config.json that will be used to grab data from the CSVs
     config = json.load(con)
 
+
 class IRSScraper(BaseScraper):
     def grab_data(self):
         """
@@ -58,19 +59,23 @@ class IRSScraper(BaseScraper):
             response['NTEE_code'] = response['NTEE_code'].str.slice(start=0, stop=3)  # truncate NTEE codes
             logger.info(f'final shape: {response.shape}')
             df = df.append(response, ignore_index=True)
-            code_descriptions = []
-            code_types = []
-            code_subtypes = []
-            for i in tqdm(range(len(df))):
-                c = df.loc[i, 'NTEE_code']
-                code_descriptions.append(code_dict[c]['service_summary'])
-                code_types.append(code_dict[c]['type'])
-                code_subtypes.append(code_dict[c]['sub-type'])
-            df['description'] = code_descriptions
-            df['type'] = code_types
-            df['serviceSummary'] = code_subtypes
-            df['source'] = ['IRS'] * len(df)
-            logger.info(f'completed compiling dataframe of shape: {df.shape}')
+        df = df.drop_duplicates(
+            subset=['name', 'address1', 'city', 'state', 'zip'], ignore_index=True
+        )
+        code_descriptions = []
+        code_types = []
+        code_subtypes = []
+        for i in tqdm(range(len(df))):
+            c = df.loc[i, 'NTEE_code']
+            code_descriptions.append(code_dict[c]['service_summary'])
+            code_types.append(code_dict[c]['type'])
+            code_subtypes.append(code_dict[c]['sub-type'])
+        df['description'] = code_descriptions
+        df['type'] = code_types
+        df['serviceSummary'] = code_subtypes
+        df['source'] = ['IRS'] * len(df)
+        df['address1'].dropna(inplace=True)
+        logger.info(f'completed compiling dataframe of shape: {df.shape}')
         return df
 
     def scrape_updated_date(self):
@@ -82,7 +87,7 @@ class IRSScraper(BaseScraper):
         url = self.data_page_url
         resp = requests.get(url).text
         update_statement = re.search(
-            r'Updated data posting date: <strong>(\d\d?/\d\d?/\d{4}) </strong>', resp
+            r'Updated data posting date: <strong>(\d\d?/\d\d?/\d{4})</strong>', resp
         )
         if update_statement == None:
             return datetime.strptime('1970-01-01', '%Y-%m-%d').date()
@@ -92,6 +97,7 @@ class IRSScraper(BaseScraper):
                 update_statement.group(1), "%m/%d/%Y"
             ).date()
             return scraped_date
+
 
 data_source_name = 'irs'
 
