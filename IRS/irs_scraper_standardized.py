@@ -74,7 +74,7 @@ class IRSScraper(BaseScraper):
         df['type'] = code_types
         df['serviceSummary'] = code_subtypes
         df['source'] = ['IRS'] * len(df)
-        df['address1'].dropna(inplace=True)
+        df.drop(df[df['address1'] == 'NONE'].index, inplace = True)
         logger.info(f'completed compiling dataframe of shape: {df.shape}')
         return df
 
