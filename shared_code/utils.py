@@ -41,7 +41,7 @@ def insert_services(data, client, collection):
 
 
 def check_similarity(new_service, existing_service):
-    regex = r'(st\.? |saint | inc\.?| nfp)'
+    regex = r'(\bst\.?\b|\bsaint\b|\binc\.?\b| nfp)'
     new_subbed_service = re.sub(regex, '', new_service).lower()
     existing_subbed_service = re.sub(regex, '', existing_service).lower()
     return distance(new_subbed_service, existing_subbed_service) >= 0.9
