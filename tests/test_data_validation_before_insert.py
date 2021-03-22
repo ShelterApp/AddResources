@@ -28,25 +28,18 @@ def test_validator_on_columns():
 
 
 # This test checks if the script validator will throw an exception if there are duplicated rows in terms of the columns
-# 'name', 'address1', 'city', 'state', and 'zip'
+# 'name', 'address1', 'city', 'state', 'zip', and 'serviceSummary'
 def test_validator_on_duplicates_with_serviceSummary():
-    df = pd.read_csv('tests/test_data_validation_duplicates_with_serviceSummary.csv')
+    df = pd.read_csv('tests/test_data_for_combine_serviceSummary_column.csv')
     check_validator(df, False, 'There are duplicate rows in the data. Check logs for details.')
 
 
 # This test checks if the script validator will throw an exception if there are duplicated rows in terms of the columns
-# 'name', 'address1', 'city', 'state', and 'zip'
+# 'name', 'address1', 'city', 'state', and 'zip', except 'serviceSummary'
 def test_validator_on_duplicates():
     df = pd.read_csv('tests/test_data_validation_duplicates.csv')
     check_validator(df, False, 'There are duplicate entries in data which only differ in the serviceSummary field ' +
                     'and hence can be combined into single entry.')
-
-
-# This test checks if the script validator will throw an exception if there are duplicated rows in terms of the columns
-# 'name', 'address1', 'city', 'state', and 'zip'
-def test_validator_on_duplicates():
-    df = pd.read_csv('tests/test_data_validation_duplicates.csv')
-    check_validator(df, False)
 
 
 # This test checks if the script validator will not throw an exception if none of the rows contain invalid data
