@@ -8,13 +8,16 @@ from pymongo import MongoClient, errors
 from tqdm import tqdm
 from pytz import timezone
 
+from dateutil.parser import parse
+
 from shared_code.utils import (
     insert_services, locate_potential_duplicate,
-    check_similarity, refresh_ngrams
+    check_similarity, refresh_ngrams, validate_data
 )
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
 
 class BaseScraper:
     def __init__(self,
@@ -52,8 +55,8 @@ class BaseScraper:
     def scrape_updated_date(self):
         """
         Get html for the page. 
-        
-        Note: Script can only generate static html code (code seen using view source code option) but 
+
+        Note: Script can only generate static html code (code seen using view source code option) but
         won't produce javascript generated html content for the page which browser displays.
 
         If data_page_url is empty we can assume we want to scrape this page everytime hence we can return todays date.
@@ -62,12 +65,12 @@ class BaseScraper:
             return datetime.now(timezone('UTC')).date()
         return requests.get(self.data_page_url, timeout=(6.05, 15)).text
 
-    def retrieve_last_scraped_date(self, client) -> datetime.date:        
+    def retrieve_last_scraped_date(self, client) -> datetime.date:
         data_source = client['data-sources'].find_one(
             {"name": self.data_source_collection_name})
-        if data_source is None or data_source['last_scraped'] is None: 
+        if data_source is None or data_source['last_scraped'] is None:
             return None
-        return data_source['last_scraped'].date()
+        return parse(data_source['last_scraped']).date()
 
     def grab_data(self, df=None) -> pd.DataFrame:
         """Base function for retrieving raw data and performing basic pre-processing
@@ -115,7 +118,7 @@ class BaseScraper:
         """
         found_duplicates = []
         coll = client[self.dump_collection]
-        for i in tqdm(range(len(df))):
+        for i, row in tqdm(df.iterrows()):
             idx = df.loc[i, self.collection_dupe_field]
             dupe = coll.find_one(
                 {self.collection_dupe_field: idx}
@@ -129,12 +132,12 @@ class BaseScraper:
 
     def is_new_data_available(self, client: MongoClient) -> bool:
         """
-        Common routine to check if new data is available for the scraper. 
+        Common routine to check if new data is available for the scraper.
         """
         scraped_update_date = self.scrape_updated_date()
         stored_update_date = self.retrieve_last_scraped_date(client)
         if stored_update_date is not None:
-            if scraped_update_date < stored_update_date:                
+            if scraped_update_date < stored_update_date:
                 return False
         return True
 
@@ -146,7 +149,7 @@ class BaseScraper:
         :return:
         """
 
-        left_columns = {'serviceSummary':', '.join}
+        left_columns = {'serviceSummary': ', '.join}
         for column in df:
             if column not in self.groupby_columns and column != 'serviceSummary':
                 left_columns[column] = 'first'
@@ -155,14 +158,14 @@ class BaseScraper:
 
     def add_required_fields(self, df: pd.DataFrame):
         """
-        Add (if doesn't exists) some required fields in documents to be inserted in db collection. e.g. notes.  
+        Add (if doesn't exists) some required fields in documents to be inserted in db collection. e.g. notes.
         """
         if not 'notes' in df:
             df['notes'] = ''
         if not 'source' in df:
-           if self.source is not None and self.source != '':
+            if self.source is not None and self.source != '':
                 df['source'] = self.source
-           else:
+            else:
                 raise Exception("value for field `source` can't be null or emtpy.")
 
     def main_scraper(self, client: MongoClient) -> None:
@@ -177,6 +180,9 @@ class BaseScraper:
             return
 
         df = self.grab_data()
+
+        # Only add data complicit with ShelterApp's rules
+        validate_data(df)
 
         if client[self.dump_collection].estimated_document_count() > 0:
             logger.info(f'purging duplicates from existing {self.source} collection')
@@ -193,7 +199,7 @@ class BaseScraper:
             refresh_ngrams(client, self.check_collection)
             found_duplicates = []
             logger.info('checking for duplicates in the services collection')
-            for i in tqdm(range(len(df))):
+            for i, row in tqdm(df.iterrows()):
                 dc = locate_potential_duplicate(
                     df.loc[i, 'name'], df.loc[i, 'zip'], client, self.check_collection
                 )
@@ -219,7 +225,7 @@ class BaseScraper:
                     {'$set': {'last_scraped': datetime.now(timezone('UTC')).replace(microsecond=0).isoformat()}},
                     upsert=True
                 )
-                
+
     @property
     def source(self) -> str:
         return self._source

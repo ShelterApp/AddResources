@@ -2,11 +2,17 @@ import logging
 import os
 from collections import OrderedDict
 
+import pandas as pd
 from pymongo import MongoClient, TEXT
 from tqdm import tqdm
 import re
 import urllib
 import numpy as np
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+pd.set_option("display.max_rows", None, "display.max_columns", None)
 
 def get_mongo_client(arg1=None, arg2=None):
     db_name = 'shelter'
@@ -23,7 +29,7 @@ def get_mongo_client(arg1=None, arg2=None):
     else:
         return MongoClient("mongodb+srv://" 
         + os.environ["DBUSERNAME"] + ":" 
-        + os.environ["PW"] 
+        + os.environ["PW"]
         + "@shelter-rm3lc.azure.mongodb.net/shelter?retryWrites=true&w=majority")[db_name]
     
 def insert_services(data, client, collection):
@@ -145,3 +151,60 @@ def locate_potential_duplicate(name, zipcode, client, collection):
     if dupe_candidate is not None:
         return dupe_candidate["name"]
     return False
+
+
+def validate_data(df):
+    # Check if all the required columns ('name', 'address1', 'city', 'state', 'zip', 'serviceSummary')
+    # are in the data frame
+    requiredColumns = ['name', 'address1', 'city', 'state', 'zip', 'serviceSummary']
+    missingColumns = []
+    for column in requiredColumns:
+        if not column in df.columns:
+            missingColumns.append(column)
+    if len(missingColumns) > 0:
+        raise Exception('The data frame does not contain the following required column(s): ' + str(missingColumns))
+
+    columns_to_display = ['name', 'city', 'state', 'zip']
+
+    found_error = False
+
+    # Identifies any row that contains a null or 'NONE' value in the 'name', 'address1', or 'serviceSummary' columns as
+    # invalid
+    for column in ['name', 'address1', 'serviceSummary']:
+        df_errors = df[empty_slots(df, column)]
+        if len(df_errors) > 0:
+            found_error = True
+            logger.error(" null or invalid values found for \'" + column + "\' column in rows: "
+                         + str(df_errors.index.values))
+            logger.error(df_errors[columns_to_display])
+
+    # Identifies any row that contains a null or 'NONE' value in the 'city', 'state', and 'zip' columns as invalid
+    df_errors = df[(empty_slots(df, 'city') | empty_slots(df, 'state')) & empty_slots(df, 'zip')]
+    if len(df_errors) > 0:
+        found_error = True
+        logger.error(" null or invalid values found for \'city\', \'state\', and \'zip\' columns in rows: " +
+                     str(df_errors.index.values))
+        logger.error(df_errors[columns_to_display])
+
+    if found_error:
+        raise Exception('Some rows have invalid data. Check logs for details.')
+
+    # Checks if there are duplicated rows in terms of the columns 'name', 'address1', 'city', 'state', and 'zip'
+    df1 = df[df.apply(lambda x: x.astype(str).str.lower()).groupby(['name', 'address1', 'city', 'state', 'zip',
+                                                                    'serviceSummary'])['serviceSummary'].transform(
+                                                                    'count') > 1]
+    if len(df1) > 0:
+        logger.error(df1)
+        raise Exception('There are duplicate rows in the data. Check logs for details.')
+
+    # Checks if there are duplicated rows in terms of the columns 'name', 'address1', 'city', 'state', and 'zip'
+    df1 = df[df.apply(lambda x: x.astype(str).str.lower()).groupby(['name', 'address1', 'city', 'state',
+                                                                    'zip'])['serviceSummary'].transform('count') > 1]
+    if len(df1) > 0:
+        logger.error(df1)
+        raise Exception('There are duplicate entries in data which only differ in the serviceSummary field and hence ' +
+                        'can be combined into single entry.')
+
+
+def empty_slots(df, column):
+    return (df[column].isna()) | (df[column] == '') | (df[column].str.upper() == 'NONE')
