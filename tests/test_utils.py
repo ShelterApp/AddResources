@@ -84,7 +84,9 @@ def test_locate_potential_duplicate(test_scraper_data,test_services_data, shelte
 
     except Exception as e:
         test_services_coll.drop()
+        tmp_test_scraper_coll.drop()
         raise(e)
 
 
     test_services_coll.drop()
+    tmp_test_scraper_coll.drop()
