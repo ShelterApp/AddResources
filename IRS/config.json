@@ -26,7 +26,7 @@
 		"L30": {"type": "RESOURCES", "sub-type": "Miscellaneous Services", "service_summary": "Housing Search Assistance"},
 		"L40": {"type": "SHELTER", "sub-type": "Transitional Housing", "service_summary": "Temporary Housing"},
 		"L41": {"type": "SHELTER", "sub-type": "Emergency Shelter", "service_summary": "Homeless Shelters"},
-		"L80": {"type": "SHELTER", "sub-type": "", "service_summary": "Housing Support"},
+		"L80": {"type": "SHELTER", "sub-type": "Housing Support", "service_summary": "Housing Support"},
 		"L99": {"type": "SHELTER", "sub-type": "Transitional Shelter", "service_summary": "Housing & Shelter N.E.C."},
 		"P24": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Salvation Army"},
 		"P26": {"type": "RESOURCES", "sub-type": "Support Services", "service_summary": "Volunteers of America"},
