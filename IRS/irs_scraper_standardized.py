@@ -99,7 +99,7 @@ class IRSScraper(BaseScraper):
             return scraped_date
 
 
-data_source_name = 'irs'
+data_source_name = 'irs_standardized'
 
 irs_scraper = IRSScraper(
     source=data_source_name,

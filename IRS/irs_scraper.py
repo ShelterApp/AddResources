@@ -12,6 +12,7 @@ import requests
 from tqdm import tqdm
 import urllib
 from pytz import timezone
+from dateutil.parser import parse
 
 _i = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _i not in sys.path:
@@ -37,19 +38,19 @@ def scrape_updated_date():
           'organizations-business-master-file-extract-eo-bmf'
     resp = requests.get(url).text
     update_statement = re.search(
-        r'Updated data posting date: (\d\d?/\d\d?/\d{4}) Record', resp
+        r'Updated data posting date: <strong>(\d\d?/\d\d?/\d{4})</strong>', resp
     )
     scraped_date = datetime.strptime(
         update_statement.group(1), "%m/%d/%Y"
     ).date()
     return scraped_date
 
-def retrieve_last_scraped_date(client) -> datetime.date:        
-    data_source = client['data-sources'].find_one(
+def retrieve_last_scraped_date(client) -> datetime.date:
+    data_source = get_mongo_client()['data-sources'].find_one(
         {"name": "irs"})
-    if data_source is None or data_source['last_scraped'] is None: 
+    if data_source is None or data_source['last_scraped'] is None:
         return None
-    return data_source['last_scraped'].date()
+    return parse(data_source['last_scraped']).date()
 
 def check_site_for_new_date(existing_date):
     """Check IRS web page with data files to see if the most
