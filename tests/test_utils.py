@@ -46,8 +46,17 @@ def test_refresh_ngrams(test_services_data,mock_mongo_client):
     assert mock_mongo_client.shelter.services.find_one({"name":"Crossroads Baptist Church"})["ngrams"] == ' '.join(make_ngrams('Crossroads Baptist Church'.upper()))
 
 def test_check_similarity():
+    #Positive test
     assert distance('Crossroads Baptists Church', 'Crossroads Baptist Church') >= .9
     assert check_similarity('Crossroads Baptists Church', 'Crossroads Baptist Church')
+
+    #Negative test
+    assert distance('st. Paul Church House', 'saint Paul Church House') < .9
+    assert check_similarity('st. Paul Church House', 'saint Paul Church House')
+
+    #Negative Test
+    assert distance('St. Paul Church House', 'Saint Paul Church House') < .9
+    assert check_similarity('St. Paul Church House', 'Saint Paul Church House')
 
 
 def test_locate_potential_duplicate(test_scraper_data,test_services_data, shelter_db):
