@@ -3,7 +3,7 @@ azure.functions==1.4.0
 beautifulsoup4==4.9.3
 bleach==3.3.0
 bson==0.5.10
-certifi==2020.6.20
+certifi==2022.12.7
 chardet==3.0.4
 click==7.1.2
 colorama==0.4.4
